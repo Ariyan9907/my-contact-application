@@ -1,0 +1,13 @@
+# Compiled class files
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+
+# Build folders
+out/
+build/
+
+# Logs
+*.log
