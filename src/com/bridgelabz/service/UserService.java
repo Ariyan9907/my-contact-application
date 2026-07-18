@@ -1,6 +1,8 @@
 package com.bridgelabz.service;
 
+import com.bridgelabz.factory.ContactFactory;
 import com.bridgelabz.factory.UserFactory;
+import com.bridgelabz.model.Contact;
 import com.bridgelabz.model.User;
 import com.bridgelabz.repository.UserRepository;
 import com.bridgelabz.util.PasswordHasher;
@@ -80,5 +82,110 @@ public class UserService {
         else {
             System.out.println("Invalid User");
         }
+    }
+
+    public String addContact(User loggedInUser,
+                             String name,
+                             String phoneNumber,
+                             String email) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        if (!validateName(name)) {
+            return "Invalid Contact Name";
+        }
+
+        if (!validateEmail(email)) {
+            return "Invalid Contact Email";
+        }
+
+        Contact contact = ContactFactory.createContact(
+                name,
+                phoneNumber,
+                email
+        );
+
+        loggedInUser.getContacts().add(contact);
+
+        return "Contact Added Successfully";
+    }
+
+    public void viewContacts(User loggedInUser) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        if (loggedInUser.getContacts().isEmpty()) {
+            System.out.println("No contacts found.");
+            return;
+        }
+
+        System.out.println("\n===== CONTACT LIST =====");
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            System.out.println("----------------------------");
+            System.out.println("ID      : " + contact.getId());
+            System.out.println("Name    : " + contact.getName());
+            System.out.println("Phone   : " + contact.getPhoneNumber());
+            System.out.println("Email   : " + contact.getEmail());
+            System.out.println("Created : " + contact.getCreatedAt());
+        }
+    }
+
+    public String updateContact(User loggedInUser,
+                                String contactId,
+                                String name,
+                                String phoneNumber,
+                                String email) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            if (contact.getId().equals(contactId)) {
+
+                if (!validateName(name)) {
+                    return "Invalid Contact Name";
+                }
+
+                if (!validateEmail(email)) {
+                    return "Invalid Contact Email";
+                }
+
+                contact.setName(name);
+                contact.setPhoneNumber(phoneNumber);
+                contact.setEmail(email);
+
+                return "Contact Updated Successfully";
+            }
+        }
+
+        return "Contact Not Found";
+    }
+
+    public String deleteContact(User loggedInUser, String contactId) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            if (contact.getId().equals(contactId)) {
+
+                loggedInUser.getContacts().remove(contact);
+
+                return "Contact Deleted Successfully";
+            }
+        }
+
+        return "Contact Not Found";
     }
 }

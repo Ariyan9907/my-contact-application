@@ -1,6 +1,8 @@
 package com.bridgelabz.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private String id;
@@ -8,6 +10,7 @@ public class User {
     private String email;
     private String password;
     private LocalDateTime createdAt;
+    private final List<Contact> contacts = new ArrayList<>();
 
     public User(String id, String name, String email, String password, LocalDateTime createdAt) {
         this.id = id;
@@ -15,6 +18,10 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
+    }
+
+    public List<Contact> getContacts() {
+        return contacts;
     }
 
     public String getId() {

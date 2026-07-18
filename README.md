@@ -1,89 +1,287 @@
-# UC3 – User Profile
+# UC4 – Contact Management
 
 ## Objective
 
-Implement a simple user profile feature that allows an authenticated user to view their profile information after a successful login.
+Implement a simple Contact Management system that allows an authenticated user to manage their personal contacts.
+
+The implementation follows CRUD (Create, Read, Update, Delete) operations while keeping the design simple and object-oriented.
+
+---
 
 ## Features
 
-* Display the logged-in user's profile.
-* Reuse the authenticated `User` object returned by the login process.
-* Display the following information:
+* Add a new contact.
+* View all contacts of the logged-in user.
+* Update an existing contact.
+* Delete a contact.
+* Every contact has:
 
-    * User ID
-    * Name
-    * Email
-    * Account Creation Date
-* Show an "Invalid User" message if no authenticated user is available.
+  * Unique ID (UUID)
+  * Name
+  * Phone Number
+  * Email
+  * Created Date & Time
+* Each user maintains their own contact list.
+
+---
 
 ## Classes Used
 
-### UserService
+### Contact
 
-Added:
+Package
 
-```java
-viewProfile(User loggedUser)
+```text
+com.bridgelabz.model
 ```
 
-Responsibilities:
+Represents a contact.
 
-* Accept the authenticated `User`.
-* Verify that the user is not `null`.
-* Display the user's profile details.
-* Display an appropriate message for an invalid user.
+Fields
+
+```java
+id
+name
+phoneNumber
+email
+createdAt
+```
+
+Responsibilities
+
+* Store contact information.
+* Provide getters and setters.
+* Represent a single contact.
+
+---
 
 ### User
 
-Reused:
+Updated by adding:
 
-* `getId()`
-* `getName()`
-* `getEmail()`
-* `getCreatedAt()`
+```java
+private final List<Contact> contacts = new ArrayList<>();
+```
 
-These getters are used to retrieve and display the user's profile information.
+Getter
 
-## Profile View Flow
+```java
+public List<Contact> getContacts()
+```
+
+Responsibilities
+
+* Each authenticated user owns and manages their personal contacts.
+* Maintains a one-to-many relationship with `Contact`.
+
+---
+
+### ContactFactory
+
+Package
 
 ```text
-User Login
-      │
-      ▼
-Authenticated User
-      │
-      ▼
-viewProfile(User)
-      │
-      ▼
-User Exists?
-      │
+com.bridgelabz.factory
+```
+
+Method
+
+```java
+createContact()
+```
+
+Responsibilities
+
+* Generate UUID.
+* Set creation timestamp.
+* Return a new `Contact` object.
+
+---
+
+### UserService
+
+Added methods
+
+```java
+addContact()
+
+viewContacts()
+
+updateContact()
+
+deleteContact()
+```
+
+Responsibilities
+
+* Validate contact information.
+* Create contacts.
+* Add contacts to the logged-in user.
+* Display all contacts.
+* Update contact details.
+* Delete contacts.
+
+---
+
+## Contact Management Flow
+
+### Add Contact
+
+```text
+Login
+   │
+   ▼
+Enter Contact Details
+   │
+   ▼
+Validate Contact
+   │
+   ▼
+Create Contact
+   │
+   ▼
+Add to User Contact List
+   │
+   ▼
+Contact Added Successfully
+```
+
+---
+
+### View Contacts
+
+```text
+Login
+   │
+   ▼
+Fetch User Contact List
+   │
+   ▼
+Contacts Available?
+   │
  ┌────┴─────┐
  │          │
 No         Yes
  │          │
  ▼          ▼
-Invalid   Display
- User     User Profile
+No Contacts Display Contacts
 ```
+
+---
+
+### Update Contact
+
+```text
+Login
+   │
+   ▼
+Enter Contact ID
+   │
+   ▼
+Find Contact
+   │
+ ┌────┴─────┐
+ │          │
+No         Yes
+ │          │
+ ▼          ▼
+Contact     Update
+Not Found   Details
+               │
+               ▼
+     Contact Updated Successfully
+```
+
+---
+
+### Delete Contact
+
+```text
+Login
+   │
+   ▼
+Enter Contact ID
+   │
+   ▼
+Find Contact
+   │
+ ┌────┴─────┐
+ │          │
+No         Yes
+ │          │
+ ▼          ▼
+Contact     Remove Contact
+Not Found         │
+                  ▼
+     Contact Deleted Successfully
+```
+
+---
+
+## Architecture
+
+```text
+Main
+   │
+   ▼
+UserService
+   │
+   ├── Validation
+   ├── ContactFactory
+   ├── UserRepository
+   │
+   ▼
+Authenticated User
+   │
+   ▼
+List<Contact>
+   │
+   ├── Add
+   ├── View
+   ├── Update
+   └── Delete
+```
+
+---
 
 ## Testing
 
-### Valid User
+### Add Contact
 
-* Login successfully.
-* Pass the authenticated `User` object to `viewProfile()`.
-* Profile details are displayed.
+* Valid contact information.
+* Invalid contact name.
+* Invalid contact email.
+* User not logged in.
 
-### Invalid User
+### View Contacts
 
-* Pass `null` to `viewProfile()`.
-* Displays:
+* User has contacts.
+* User has no contacts.
+* User not logged in.
 
-```
-Invalid User
-```
+### Update Contact
+
+* Valid contact ID.
+* Invalid contact ID.
+* Invalid updated information.
+
+### Delete Contact
+
+* Valid contact ID.
+* Invalid contact ID.
+* User not logged in.
+
+---
 
 ## Outcome
 
-UC3 successfully allows authenticated users to view their profile information by reusing the `User` object obtained during login. The implementation remains simple and prepares the project for upcoming features such as Contact Management, where the authenticated user will perform actions on their personal contacts.
+UC4 successfully implements the core Contact Management functionality using CRUD operations.
+
+The implementation maintains a simple object-oriented design where:
+
+* Users are managed through `UserRepository`.
+* Each `User` owns their own `List<Contact>`.
+* Contact creation is centralized using `ContactFactory`.
+* Contact operations are performed only on the authenticated user's contact list.
+
+This design prepares the project for future enhancements such as Decorator, Command, Composite, and Specification patterns in later use cases.
