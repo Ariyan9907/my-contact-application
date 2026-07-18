@@ -1,36 +1,19 @@
 package com.test;
 
+import com.bridgelabz.model.User;
+import com.bridgelabz.service.UserService;
 import com.bridgelabz.util.PasswordHasher;
 
 public class ManualTest {
     public static void main(String[] args) {
 
-        String password = "Aryan@123";
+        UserService userService = new UserService();
+        String aryan = userService.register("Aryan", "aryan@gmail.com", "Aryan@9907", "Aryan@9907");
+        System.out.println(aryan);
 
-        String hashedPassword = PasswordHasher.hashPassword(password);
+        User login = userService.login("aryan@gmail.com", "Aryan@9907");
+        System.out.println(login.getName());
 
-        System.out.println("Original Password : " + password);
-        System.out.println("Hashed Password   : " + hashedPassword);
 
-        // Hashing the same password again
-        String hashedPassword2 = PasswordHasher.hashPassword(password);
-
-        System.out.println("\nHash Again        : " + hashedPassword2);
-
-        if (hashedPassword.equals(hashedPassword2)) {
-            System.out.println("\nBoth hashes are equal.");
-        } else {
-            System.out.println("\nHashes are different.");
-        }
-
-        // Different password
-        String anotherPassword = "Aryan@124";
-        String hashedPassword3 = PasswordHasher.hashPassword(anotherPassword);
-
-        System.out.println("\nDifferent Password Hash : " + hashedPassword3);
-
-        if (!hashedPassword.equals(hashedPassword3)) {
-            System.out.println("Different passwords produce different hashes.");
-        }
     }
 }

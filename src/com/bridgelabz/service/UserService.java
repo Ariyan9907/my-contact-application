@@ -52,4 +52,19 @@ public class UserService {
     public UserRepository getRepository() {
         return repository;
     }
+
+    public User login(String email,String password){
+        User user = repository.findUserByEmail(email);
+
+        if(user==null){
+            return null;
+        }
+        String hashedPassword = PasswordHasher.hashPassword(password);
+        if(user.getPassword().equals(hashedPassword)){
+            return user;
+        }
+
+        return null;
+
+    }
 }

@@ -14,7 +14,7 @@ public class Validation {
     }
 
     public static boolean validatePassword(String password){
-        String pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@%&&#!])";
+        String pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@%#!]).{8,}$";
         return Pattern.matches(pattern,password);
     }
 }
