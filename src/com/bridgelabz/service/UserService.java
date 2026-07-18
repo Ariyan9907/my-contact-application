@@ -67,4 +67,18 @@ public class UserService {
         return null;
 
     }
+
+    public void  viewProfile(User logedUser){
+        if(logedUser!=null){
+            System.out.println("Login Successfull");
+            System.out.println("\n===== USER PROFILE =====");
+            System.out.println("ID         : " + logedUser.getId());
+            System.out.println("Name       : " + logedUser.getName());
+            System.out.println("Email      : " + logedUser.getEmail());
+            System.out.println("Created At : " + logedUser.getCreatedAt());
+        }
+        else {
+            System.out.println("Invalid User");
+        }
+    }
 }

@@ -1,17 +1,20 @@
-# UC2 – User Authentication (Login)
+# UC3 – User Profile
 
 ## Objective
 
-Implement a simple and secure user authentication system that allows registered users to log in using their email and password.
+Implement a simple user profile feature that allows an authenticated user to view their profile information after a successful login.
 
 ## Features
 
-* Login using registered email and password.
-* Search user by email using `UserRepository`.
-* Hash the entered password using SHA-256.
-* Compare the hashed password with the stored hashed password.
-* Return the authenticated `User` object on successful login.
-* Return `null` if authentication fails.
+* Display the logged-in user's profile.
+* Reuse the authenticated `User` object returned by the login process.
+* Display the following information:
+
+    * User ID
+    * Name
+    * Email
+    * Account Creation Date
+* Show an "Invalid User" message if no authenticated user is available.
 
 ## Classes Used
 
@@ -20,80 +23,67 @@ Implement a simple and secure user authentication system that allows registered 
 Added:
 
 ```java
-login(String email, String password)
+viewProfile(User loggedUser)
 ```
 
 Responsibilities:
 
-* Find the user by email.
-* Verify that the user exists.
-* Hash the entered password.
-* Compare password hashes.
-* Return the authenticated `User` object or `null`.
+* Accept the authenticated `User`.
+* Verify that the user is not `null`.
+* Display the user's profile details.
+* Display an appropriate message for an invalid user.
 
-### UserRepository
-
-Reused:
-
-```java
-findUserByEmail(String email)
-```
-
-### PasswordHasher
+### User
 
 Reused:
 
-```java
-hashPassword(String password)
-```
+* `getId()`
+* `getName()`
+* `getEmail()`
+* `getCreatedAt()`
 
-Uses the SHA-256 algorithm to securely hash passwords before comparison.
+These getters are used to retrieve and display the user's profile information.
 
-## Authentication Flow
+## Profile View Flow
 
 ```text
-Enter Email
+User Login
       │
       ▼
-Find User by Email
+Authenticated User
+      │
+      ▼
+viewProfile(User)
       │
       ▼
 User Exists?
       │
- ┌────┴────┐
- │         │
-No        Yes
- │         │
- ▼         ▼
-Invalid   Hash Entered Password
-              │
-              ▼
-      Compare Password Hashes
-              │
-      ┌───────┴────────┐
-      ▼                ▼
- Login Successful   Invalid Credentials
+ ┌────┴─────┐
+ │          │
+No         Yes
+ │          │
+ ▼          ▼
+Invalid   Display
+ User     User Profile
 ```
 
 ## Testing
 
-### Successful Login
+### Valid User
 
-* Email exists.
-* Correct password entered.
-* Returns the authenticated `User`.
+* Login successfully.
+* Pass the authenticated `User` object to `viewProfile()`.
+* Profile details are displayed.
 
-### Invalid Password
+### Invalid User
 
-* Email exists.
-* Incorrect password entered.
-* Returns `null`.
+* Pass `null` to `viewProfile()`.
+* Displays:
 
-### Invalid Email
-
-* Email does not exist.
-* Returns `null`.
+```
+Invalid User
+```
 
 ## Outcome
 
-UC2 successfully provides a simple authentication mechanism by reusing the existing registration components from UC1 without introducing additional design patterns. The authenticated `User` object can now be reused in upcoming use cases such as User Profile and Contact Management.
+UC3 successfully allows authenticated users to view their profile information by reusing the `User` object obtained during login. The implementation remains simple and prepares the project for upcoming features such as Contact Management, where the authenticated user will perform actions on their personal contacts.

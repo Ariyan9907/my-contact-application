@@ -11,8 +11,9 @@ public class ManualTest {
         String aryan = userService.register("Aryan", "aryan@gmail.com", "Aryan@9907", "Aryan@9907");
         System.out.println(aryan);
 
-        User login = userService.login("aryan@gmail.com", "Aryan@9907");
-        System.out.println(login.getName());
+        User logedUser = userService.login("aryan@gmail.com", "Aryan@9907");
+        userService.viewProfile(logedUser);
+
 
 
     }
