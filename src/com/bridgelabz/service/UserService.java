@@ -1,11 +1,17 @@
 package com.bridgelabz.service;
 
+import com.bridgelabz.decorator.BasicContactFormatter;
+import com.bridgelabz.decorator.ContactFormatter;
+import com.bridgelabz.decorator.MaskEmailDecorator;
+import com.bridgelabz.decorator.UpperCaseDecorator;
 import com.bridgelabz.factory.ContactFactory;
 import com.bridgelabz.factory.UserFactory;
 import com.bridgelabz.model.Contact;
 import com.bridgelabz.model.User;
 import com.bridgelabz.repository.UserRepository;
 import com.bridgelabz.util.PasswordHasher;
+
+import java.util.List;
 
 import static com.bridgelabz.validations.Validation.*;
 
@@ -187,5 +193,39 @@ public class UserService {
         }
 
         return "Contact Not Found";
+    }
+
+    public void viewContactDetails(User loggedUser, int contactNumber, int choice) {
+
+        if (loggedUser == null) {
+            System.out.println("Please login first.");
+            return;
+        }
+
+        List<Contact> contacts = loggedUser.getContacts();
+
+        if (contactNumber < 1 || contactNumber > contacts.size()) {
+            System.out.println("Invalid contact number.");
+            return;
+        }
+
+        Contact contact = contacts.get(contactNumber - 1);
+
+        ContactFormatter formatter = new BasicContactFormatter();
+
+        switch (choice) {
+            case 2:
+                formatter = new UpperCaseDecorator(formatter);
+                break;
+            case 3:
+                formatter = new MaskEmailDecorator(formatter);
+                break;
+            case 4:
+                formatter = new MaskEmailDecorator(
+                        new UpperCaseDecorator(formatter));
+                break;
+        }
+
+        System.out.println(formatter.format(contact));
     }
 }

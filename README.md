@@ -1,287 +1,284 @@
-# UC4 – Contact Management
+# UC5 – View Contact Details using Decorator Pattern
 
 ## Objective
 
-Implement a simple Contact Management system that allows an authenticated user to manage their personal contacts.
-
-The implementation follows CRUD (Create, Read, Update, Delete) operations while keeping the design simple and object-oriented.
+Implement the **View Contact Details** feature using the **Decorator Design Pattern**. This feature allows users to view contact information in different display formats without modifying the original `Contact` object.
 
 ---
 
-## Features
+# Features
 
-* Add a new contact.
-* View all contacts of the logged-in user.
-* Update an existing contact.
-* Delete a contact.
-* Every contact has:
-
-  * Unique ID (UUID)
-  * Name
-  * Phone Number
-  * Email
-  * Created Date & Time
-* Each user maintains their own contact list.
+- View complete details of a selected contact.
+- Display contact information in multiple formats:
+  - Normal Display
+  - Uppercase Name
+  - Masked Email
+  - Uppercase Name + Masked Email
+- Apply formatting dynamically using the **Decorator Pattern**.
+- Preserve original contact data while changing only the displayed output.
+- Select contacts using a contact number instead of typing the generated UUID.
 
 ---
 
-## Classes Used
+# Classes Used
 
-### Contact
+## `ContactFormatter`
+- Interface defining the formatting contract.
+- Method:
+  ```java
+  String format(Contact contact);
+  ```
 
-Package
+---
 
-```text
-com.bridgelabz.model
-```
+## `BasicContactFormatter`
+- Implements `ContactFormatter`.
+- Displays contact details in the default format.
 
-Represents a contact.
+---
 
-Fields
+## `ContactDecorator`
+- Abstract decorator implementing `ContactFormatter`.
+- Holds a reference to another `ContactFormatter`.
+- Provides the foundation for all decorators.
+
+---
+
+## `UpperCaseDecorator`
+- Extends `ContactDecorator`.
+- Converts the contact name to uppercase before displaying.
+
+---
+
+## `MaskEmailDecorator`
+- Extends `ContactDecorator`.
+- Masks the email address before displaying it.
+
+---
+
+## `UserService`
+
+### Added Method
 
 ```java
-id
-name
-phoneNumber
-email
-createdAt
+viewContactDetails(User loggedUser, int contactNumber, int choice)
 ```
 
-Responsibilities
+Responsibilities:
 
-* Store contact information.
-* Provide getters and setters.
-* Represent a single contact.
+- Validate logged-in user.
+- Retrieve the selected contact.
+- Apply the selected decorator(s).
+- Display formatted contact details.
 
 ---
 
-### User
+## `ManualTest`
 
-Updated by adding:
+Updated to:
 
-```java
-private final List<Contact> contacts = new ArrayList<>();
-```
-
-Getter
-
-```java
-public List<Contact> getContacts()
-```
-
-Responsibilities
-
-* Each authenticated user owns and manages their personal contacts.
-* Maintains a one-to-many relationship with `Contact`.
+- Display all contacts.
+- Allow the user to select a contact by number.
+- Allow the user to choose a display format.
+- Display the formatted contact details.
 
 ---
 
-### ContactFactory
-
-Package
+# Process Flow
 
 ```text
-com.bridgelabz.factory
+User Login
+      │
+      ▼
+View Contact List
+      │
+      ▼
+Select Contact Number
+      │
+      ▼
+Choose Display Format
+      │
+      ▼
+BasicContactFormatter
+      │
+      ▼
+(Optional) UpperCaseDecorator
+      │
+      ▼
+(Optional) MaskEmailDecorator
+      │
+      ▼
+Display Contact Details
 ```
-
-Method
-
-```java
-createContact()
-```
-
-Responsibilities
-
-* Generate UUID.
-* Set creation timestamp.
-* Return a new `Contact` object.
 
 ---
 
-### UserService
-
-Added methods
-
-```java
-addContact()
-
-viewContacts()
-
-updateContact()
-
-deleteContact()
-```
-
-Responsibilities
-
-* Validate contact information.
-* Create contacts.
-* Add contacts to the logged-in user.
-* Display all contacts.
-* Update contact details.
-* Delete contacts.
-
----
-
-## Contact Management Flow
-
-### Add Contact
+# Decorator Flow
 
 ```text
-Login
-   │
-   ▼
-Enter Contact Details
-   │
-   ▼
-Validate Contact
-   │
-   ▼
-Create Contact
-   │
-   ▼
-Add to User Contact List
-   │
-   ▼
-Contact Added Successfully
+                Contact
+                   │
+                   ▼
+      BasicContactFormatter
+                   │
+      ┌────────────┴────────────┐
+      ▼                         ▼
+UpperCaseDecorator      MaskEmailDecorator
+      │                         │
+      └────────────┬────────────┘
+                   ▼
+          Formatted Output
 ```
 
 ---
 
-### View Contacts
+# Testing
+
+## Test Case 1 – Normal Display
+
+### Input
 
 ```text
-Login
-   │
-   ▼
-Fetch User Contact List
-   │
-   ▼
-Contacts Available?
-   │
- ┌────┴─────┐
- │          │
-No         Yes
- │          │
- ▼          ▼
-No Contacts Display Contacts
+Contact Number : 1
+Choice : 1
 ```
 
----
-
-### Update Contact
+### Expected Output
 
 ```text
-Login
-   │
-   ▼
-Enter Contact ID
-   │
-   ▼
-Find Contact
-   │
- ┌────┴─────┐
- │          │
-No         Yes
- │          │
- ▼          ▼
-Contact     Update
-Not Found   Details
-               │
-               ▼
-     Contact Updated Successfully
+Name  : Aryan
+Phone : 9876543210
+Email : aryan@gmail.com
 ```
 
 ---
 
-### Delete Contact
+## Test Case 2 – Uppercase Name
+
+### Input
 
 ```text
-Login
-   │
-   ▼
-Enter Contact ID
-   │
-   ▼
-Find Contact
-   │
- ┌────┴─────┐
- │          │
-No         Yes
- │          │
- ▼          ▼
-Contact     Remove Contact
-Not Found         │
-                  ▼
-     Contact Deleted Successfully
+Contact Number : 1
+Choice : 2
 ```
 
----
-
-## Architecture
+### Expected Output
 
 ```text
-Main
-   │
-   ▼
-UserService
-   │
-   ├── Validation
-   ├── ContactFactory
-   ├── UserRepository
-   │
-   ▼
-Authenticated User
-   │
-   ▼
-List<Contact>
-   │
-   ├── Add
-   ├── View
-   ├── Update
-   └── Delete
+Name  : ARYAN
+Phone : 9876543210
+Email : aryan@gmail.com
 ```
 
 ---
 
-## Testing
+## Test Case 3 – Mask Email
 
-### Add Contact
+### Input
 
-* Valid contact information.
-* Invalid contact name.
-* Invalid contact email.
-* User not logged in.
+```text
+Contact Number : 1
+Choice : 3
+```
 
-### View Contacts
+### Expected Output
 
-* User has contacts.
-* User has no contacts.
-* User not logged in.
-
-### Update Contact
-
-* Valid contact ID.
-* Invalid contact ID.
-* Invalid updated information.
-
-### Delete Contact
-
-* Valid contact ID.
-* Invalid contact ID.
-* User not logged in.
+```text
+Name  : Aryan
+Phone : 9876543210
+Email : ar***@gmail.com
+```
 
 ---
 
-## Outcome
+## Test Case 4 – Uppercase + Mask Email
 
-UC4 successfully implements the core Contact Management functionality using CRUD operations.
+### Input
 
-The implementation maintains a simple object-oriented design where:
+```text
+Contact Number : 1
+Choice : 4
+```
 
-* Users are managed through `UserRepository`.
-* Each `User` owns their own `List<Contact>`.
-* Contact creation is centralized using `ContactFactory`.
-* Contact operations are performed only on the authenticated user's contact list.
+### Expected Output
 
-This design prepares the project for future enhancements such as Decorator, Command, Composite, and Specification patterns in later use cases.
+```text
+Name  : ARYAN
+Phone : 9876543210
+Email : ar***@gmail.com
+```
+
+---
+
+## Test Case 5 – Invalid Contact Number
+
+### Expected Output
+
+```text
+Invalid contact number.
+```
+
+---
+
+## Test Case 6 – User Not Logged In
+
+### Expected Output
+
+```text
+Please login first.
+```
+
+---
+
+# Outcome
+
+Successfully implemented **UC5 – View Contact Details** using the **Decorator Design Pattern**.
+
+The implementation demonstrates:
+
+- Dynamic addition of formatting behavior.
+- Chaining multiple decorators together.
+- Separation of formatting logic from the `Contact` model.
+- Easy extensibility for future display formats without modifying existing classes.
+
+---
+
+# Git Workflow
+
+## Create Feature Branch
+
+```bash
+git checkout -b feature/uc5-contact-details-decorator
+```
+
+## Stage Changes
+
+```bash
+git add .
+```
+
+## Commit
+
+```bash
+git commit -m "[Ariyan Pujari] Implement UC5: View Contact Details using Decorator Pattern"
+```
+
+## Push Branch
+
+```bash
+git push origin feature/uc5-contact-details-decorator
+```
+
+## Merge into Development Branch
+
+```bash
+git checkout dev
+git merge feature/uc5-contact-details-decorator
+```
+
+## Delete Feature Branch (Optional)
+
+```bash
+git branch -d feature/uc5-contact-details-decorator
+git push origin --delete feature/uc5-contact-details-decorator
+```
