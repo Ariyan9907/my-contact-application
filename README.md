@@ -1,75 +1,91 @@
-# UC5 – View Contact Details using Decorator Pattern
+# UC6 – Edit Contact with Undo/Redo (Command Pattern)
 
 ## Objective
 
-Implement the **View Contact Details** feature using the **Decorator Design Pattern**. This feature allows users to view contact information in different display formats without modifying the original `Contact` object.
+Implement the **Edit Contact** feature using the **Command Design Pattern**. This enables users to update contact information while supporting **Undo** and **Redo** operations without directly modifying the contact from the service layer.
 
 ---
 
 # Features
 
-- View complete details of a selected contact.
-- Display contact information in multiple formats:
-  - Normal Display
-  - Uppercase Name
-  - Masked Email
-  - Uppercase Name + Masked Email
-- Apply formatting dynamically using the **Decorator Pattern**.
-- Preserve original contact data while changing only the displayed output.
-- Select contacts using a contact number instead of typing the generated UUID.
+- Edit an existing contact.
+- Validate updated contact details.
+- Undo the last contact update.
+- Redo the previously undone update.
+- Maintain command history using stacks.
+- Separate edit logic from business logic using the Command Pattern.
 
 ---
 
 # Classes Used
 
-## `ContactFormatter`
-- Interface defining the formatting contract.
-- Method:
+## `Command`
+
+- Interface representing a command.
+- Declares:
   ```java
-  String format(Contact contact);
+  void execute();
+  void undo();
   ```
 
 ---
 
-## `BasicContactFormatter`
-- Implements `ContactFormatter`.
-- Displays contact details in the default format.
+## `EditContactCommand`
+
+Implements `Command`.
+
+Responsibilities:
+
+- Store old contact details.
+- Store new contact details.
+- Execute the update.
+- Restore previous values during Undo.
 
 ---
 
-## `ContactDecorator`
-- Abstract decorator implementing `ContactFormatter`.
-- Holds a reference to another `ContactFormatter`.
-- Provides the foundation for all decorators.
+## `CommandManager`
 
----
+Responsibilities:
 
-## `UpperCaseDecorator`
-- Extends `ContactDecorator`.
-- Converts the contact name to uppercase before displaying.
+- Execute commands.
+- Maintain Undo history.
+- Maintain Redo history.
+- Perform Undo.
+- Perform Redo.
 
----
+Uses:
 
-## `MaskEmailDecorator`
-- Extends `ContactDecorator`.
-- Masks the email address before displaying it.
+- `Stack<Command> undoStack`
+- `Stack<Command> redoStack`
 
 ---
 
 ## `UserService`
 
-### Added Method
+Updated Methods:
+
+### `updateContact()`
+
+- Validate user.
+- Validate contact details.
+- Create an `EditContactCommand`.
+- Execute the command using `CommandManager`.
+
+### `undoLastEdit()`
+
+Calls:
 
 ```java
-viewContactDetails(User loggedUser, int contactNumber, int choice)
+commandManager.undo();
 ```
 
-Responsibilities:
+### `redoLastEdit()`
 
-- Validate logged-in user.
-- Retrieve the selected contact.
-- Apply the selected decorator(s).
-- Display formatted contact details.
+Calls:
+
+```java
+commandManager.redo();
+```
 
 ---
 
@@ -77,10 +93,15 @@ Responsibilities:
 
 Updated to:
 
-- Display all contacts.
-- Allow the user to select a contact by number.
-- Allow the user to choose a display format.
-- Display the formatted contact details.
+- Register a user.
+- Login.
+- Add a contact.
+- Update the contact.
+- Display updated contact.
+- Undo the update.
+- Display restored contact.
+- Redo the update.
+- Display updated contact again.
 
 ---
 
@@ -90,156 +111,153 @@ Updated to:
 User Login
       │
       ▼
-View Contact List
+Select Contact
       │
       ▼
-Select Contact Number
+Update Contact
       │
       ▼
-Choose Display Format
+Create EditContactCommand
       │
       ▼
-BasicContactFormatter
+CommandManager.executeCommand()
       │
       ▼
-(Optional) UpperCaseDecorator
+Contact Updated
       │
-      ▼
-(Optional) MaskEmailDecorator
-      │
-      ▼
-Display Contact Details
+      ├──────────────┐
+      ▼              ▼
+Undo           Redo
 ```
 
 ---
 
-# Decorator Flow
+# Command Pattern Flow
 
 ```text
-                Contact
-                   │
-                   ▼
-      BasicContactFormatter
-                   │
-      ┌────────────┴────────────┐
-      ▼                         ▼
-UpperCaseDecorator      MaskEmailDecorator
-      │                         │
-      └────────────┬────────────┘
-                   ▼
-          Formatted Output
+               UserService
+                    │
+                    ▼
+         EditContactCommand
+                    │
+        execute() / undo()
+                    │
+                    ▼
+            CommandManager
+             │          │
+             ▼          ▼
+        Undo Stack   Redo Stack
 ```
 
 ---
 
 # Testing
 
-## Test Case 1 – Normal Display
+## Test Case 1 – Update Contact
 
 ### Input
 
 ```text
-Contact Number : 1
-Choice : 1
+Name  : Rajesh
+Phone : 9999999999
+Email : rajesh@gmail.com
 ```
 
 ### Expected Output
 
 ```text
-Name  : Aryan
-Phone : 9876543210
-Email : aryan@gmail.com
+Contact Updated Successfully
 ```
 
 ---
 
-## Test Case 2 – Uppercase Name
+## Test Case 2 – Undo Update
 
-### Input
+### Action
 
 ```text
-Contact Number : 1
-Choice : 2
+Undo
 ```
 
 ### Expected Output
 
 ```text
-Name  : ARYAN
-Phone : 9876543210
-Email : aryan@gmail.com
+Undo Successful
+```
+
+Contact details should return to their previous values.
+
+---
+
+## Test Case 3 – Redo Update
+
+### Action
+
+```text
+Redo
+```
+
+### Expected Output
+
+```text
+Redo Successful
+```
+
+Updated contact details should be restored.
+
+---
+
+## Test Case 4 – Invalid Contact ID
+
+### Expected Output
+
+```text
+Contact Not Found
 ```
 
 ---
 
-## Test Case 3 – Mask Email
-
-### Input
-
-```text
-Contact Number : 1
-Choice : 3
-```
+## Test Case 5 – Invalid User
 
 ### Expected Output
 
 ```text
-Name  : Aryan
-Phone : 9876543210
-Email : ar***@gmail.com
+Please login first
 ```
 
 ---
 
-## Test Case 4 – Uppercase + Mask Email
-
-### Input
-
-```text
-Contact Number : 1
-Choice : 4
-```
+## Test Case 6 – Invalid Email
 
 ### Expected Output
 
 ```text
-Name  : ARYAN
-Phone : 9876543210
-Email : ar***@gmail.com
+Invalid Contact Email
 ```
 
 ---
 
-## Test Case 5 – Invalid Contact Number
+## Test Case 7 – Invalid Name
 
 ### Expected Output
 
 ```text
-Invalid contact number.
-```
-
----
-
-## Test Case 6 – User Not Logged In
-
-### Expected Output
-
-```text
-Please login first.
+Invalid Contact Name
 ```
 
 ---
 
 # Outcome
 
-Successfully implemented **UC5 – View Contact Details** using the **Decorator Design Pattern**.
+Successfully implemented **UC6 – Edit Contact with Undo/Redo** using the **Command Design Pattern**.
 
 The implementation demonstrates:
 
-- Dynamic addition of formatting behavior.
-- Chaining multiple decorators together.
-- Separation of formatting logic from the `Contact` model.
-- Easy extensibility for future display formats without modifying existing classes.
+- Encapsulation of edit operations as command objects.
+- Separation of business logic from edit execution.
+- Support for multiple Undo and Redo operations.
+- Easy extensibility for future commands such as Add Contact, Delete Contact, and Restore Contact.
+- Compliance with the **Single Responsibility Principle (SRP)** and **Open/Closed Principle (OCP)**.
 
 ---
 
@@ -248,7 +266,7 @@ The implementation demonstrates:
 ## Create Feature Branch
 
 ```bash
-git checkout -b feature/uc5-contact-details-decorator
+git checkout -b feature/uc6-edit-contact-command-pattern
 ```
 
 ## Stage Changes
@@ -260,25 +278,25 @@ git add .
 ## Commit
 
 ```bash
-git commit -m "[Ariyan Pujari] Implement UC5: View Contact Details using Decorator Pattern"
+git commit -m "[Ariyan Pujari] Implement UC6: Edit Contact with Undo/Redo using Command Pattern"
 ```
 
 ## Push Branch
 
 ```bash
-git push origin feature/uc5-contact-details-decorator
+git push origin feature/uc6-edit-contact-command-pattern
 ```
 
 ## Merge into Development Branch
 
 ```bash
 git checkout dev
-git merge feature/uc5-contact-details-decorator
+git merge feature/uc6-edit-contact-command-pattern
 ```
 
 ## Delete Feature Branch (Optional)
 
 ```bash
-git branch -d feature/uc5-contact-details-decorator
-git push origin --delete feature/uc5-contact-details-decorator
+git branch -d feature/uc6-edit-contact-command-pattern
+git push origin --delete feature/uc6-edit-contact-command-pattern
 ```

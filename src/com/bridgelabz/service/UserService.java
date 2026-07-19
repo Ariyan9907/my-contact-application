@@ -1,5 +1,7 @@
 package com.bridgelabz.service;
 
+import com.bridgelabz.command.CommandManager;
+import com.bridgelabz.command.EditContactCommand;
 import com.bridgelabz.decorator.BasicContactFormatter;
 import com.bridgelabz.decorator.ContactFormatter;
 import com.bridgelabz.decorator.MaskEmailDecorator;
@@ -18,6 +20,7 @@ import static com.bridgelabz.validations.Validation.*;
 public class UserService {
 
     private final UserRepository repository = new UserRepository();
+    private final CommandManager commandManager = new CommandManager();
 
     public String register(String name,
                            String email,
@@ -165,9 +168,15 @@ public class UserService {
                     return "Invalid Contact Email";
                 }
 
-                contact.setName(name);
-                contact.setPhoneNumber(phoneNumber);
-                contact.setEmail(email);
+                EditContactCommand command =
+                        new EditContactCommand(
+                                contact,
+                                name,
+                                phoneNumber,
+                                email
+                        );
+
+                commandManager.executeCommand(command);
 
                 return "Contact Updated Successfully";
             }
@@ -228,4 +237,18 @@ public class UserService {
 
         System.out.println(formatter.format(contact));
     }
+
+    public void undoLastEdit() {
+
+        commandManager.undo();
+
+    }
+
+    public void redoLastEdit() {
+
+        commandManager.redo();
+
+    }
+
+
 }
