@@ -1,97 +1,109 @@
-# UC8 – Bulk Operations using Composite Pattern
+# UC9 – Search Contacts using Specification Pattern and Chain of Responsibility
 
 ## Objective
 
-Implement **Bulk Operations** that allow a logged-in user to perform actions on multiple contacts efficiently using the **Composite Design Pattern** and Java Stream API.
+Implement an advanced contact search feature that allows a logged-in user to search contacts by **Name**, **Phone Number**, or **Email Address** using the **Specification Pattern** and **Chain of Responsibility Pattern**.
 
 ---
 
 # Features
 
-- View multiple contacts together.
-- Search contacts using Stream API.
-- Bulk delete contacts.
-- Export contacts.
-- Demonstrate Composite Pattern.
-- Use Streams, Lambda Expressions, Method References, and Batch Processing.
+- Search contacts by name.
+- Search contacts by phone number.
+- Search contacts by email address.
+- Case-insensitive search for name and email.
+- Displays all matching contacts.
+- Validates whether the user is logged in before searching.
 
 ---
 
 # Classes Used
 
-## ContactComponent
+## SearchCriteria
 
-Acts as the Component in the Composite Pattern.
+Acts as the **Specification Interface**.
 
 ### Method
 
 ```java
-void showDetails();
+boolean isSatisfied(Contact contact, String keyword);
 ```
 
-Responsibilities
+Responsibilities:
 
-- Provides a common interface for both individual contacts and groups of contacts.
+- Defines the rule for checking whether a contact satisfies a search condition.
 
 ---
 
-## SingleContact
+## NameCriteria
 
-Represents an individual contact.
+Implements `SearchCriteria`.
 
-Responsibilities
+Responsibilities:
 
-- Stores a single Contact object.
-- Displays individual contact details.
+- Checks whether the contact name contains the search keyword.
 
 ---
 
-## ContactGroup
+## PhoneCriteria
 
-Represents a collection of contacts.
+Implements `SearchCriteria`.
 
-Responsibilities
+Responsibilities:
 
-- Store multiple ContactComponent objects.
-- Display all contacts using the same interface.
+- Checks whether the phone number contains the search keyword.
 
-Methods
+---
+
+## EmailCriteria
+
+Implements `SearchCriteria`.
+
+Responsibilities:
+
+- Checks whether the email contains the search keyword.
+
+---
+
+## SearchHandler
+
+Implements the **Chain of Responsibility Pattern**.
+
+Responsibilities:
+
+- Holds a search criteria.
+- Searches contacts using the assigned criteria.
+- Passes the request to the next handler if no match is found.
+
+### Methods
 
 ```java
-add(ContactComponent contact)
+setNext(SearchHandler nextHandler)
 ```
 
-```java
-remove(ContactComponent contact)
-```
+Links the next handler in the chain.
 
 ```java
-showDetails()
+search(List<Contact> contacts, String keyword)
 ```
+
+Searches contacts using the current criteria and forwards the request if necessary.
 
 ---
 
 ## UserService
 
-### viewBulkContacts()
+Added:
 
-Displays all contacts using Composite Pattern.
+### searchContacts()
 
-### searchContact()
+Responsibilities:
 
-Searches contacts using:
-
-- Stream API
-- Lambda Expressions
-- Method References
-
-### bulkDeleteContacts()
-
-Deletes multiple contacts in one operation.
-
-### exportContacts()
-
-Exports all contacts by printing them in a structured format.
+- Validate logged-in user.
+- Create the search chain.
+- Perform search.
+- Display matching contacts.
+- Display "No Contact Found" when no matches exist.
 
 ---
 
@@ -102,10 +114,10 @@ Demonstrates:
 - User Registration
 - Login
 - Add Contacts
-- Bulk View
-- Search Contacts
-- Bulk Delete
-- Export Contacts
+- Search by Name
+- Search by Phone
+- Search by Email
+- Invalid Search
 
 ---
 
@@ -115,36 +127,89 @@ Demonstrates:
 User Login
       │
       ▼
-Select Bulk Operation
+Enter Search Keyword
       │
-      ├──────────────┐
-      ▼              ▼
- View Contacts   Search Contacts
-      │              │
-      ▼              ▼
-Composite Pattern  Stream API
-      │              │
-      └──────┬───────┘
-             ▼
-      Bulk Delete / Export
+      ▼
+Create Search Chain
+      │
+      ▼
+Name Search
+      │
+      ▼
+Match Found?
+   │
+ ┌─┴─────────────┐
+ │               │
+Yes             No
+ │               │
+ ▼               ▼
+Return      Phone Search
+                  │
+                  ▼
+             Match Found?
+                │
+          ┌─────┴─────┐
+          │           │
+         Yes         No
+          │           │
+          ▼           ▼
+      Return     Email Search
+                     │
+                     ▼
+                 Match Found?
+                │
+          ┌─────┴─────┐
+          │           │
+         Yes         No
+          │           │
+          ▼           ▼
+      Return      No Contact Found
 ```
 
 ---
 
-# Composite Pattern Structure
+# Design Patterns Used
+
+## Specification Pattern
+
+Each search condition is implemented independently.
 
 ```text
-                ContactComponent
-                     ▲
-                     │
-          ┌──────────┴──────────┐
-          ▼                     ▼
-    SingleContact         ContactGroup
-                                 │
-                    ┌────────────┴────────────┐
-                    ▼                         ▼
-             SingleContact             SingleContact
+SearchCriteria
+      ▲
+      │
+ ┌────┼──────────┐
+ ▼    ▼          ▼
+Name Phone     Email
 ```
+
+Benefits:
+
+- Single Responsibility Principle
+- Easy to extend
+- Reusable search conditions
+
+---
+
+## Chain of Responsibility Pattern
+
+Each handler gets an opportunity to process the search request.
+
+```text
+SearchHandler(Name)
+        │
+        ▼
+SearchHandler(Phone)
+        │
+        ▼
+SearchHandler(Email)
+```
+
+Benefits:
+
+- Loose coupling
+- Easy to add new search handlers
+- Cleaner search logic
 
 ---
 
@@ -161,89 +226,92 @@ contacts.stream()
 ## Lambda Expression
 
 ```java
-contact -> contact.getName().contains(keyword)
+contact -> criteria.isSatisfied(contact, keyword)
 ```
 
 ---
 
-## Method Reference
+## Predicate Logic
 
-```java
-SingleContact::new
-```
-
-```java
-group::add
-```
+Implemented through the `isSatisfied()` method in each criteria class.
 
 ---
 
-## Batch Processing
+## Case-Insensitive Search
 
 ```java
-removeIf(...)
+toLowerCase().contains(keyword.toLowerCase())
 ```
 
-Processes multiple contacts in a single operation.
+Used for searching names and email addresses.
 
 ---
 
 # Testing
 
-## Test Case 1 – Bulk View
-
-### Expected Output
-
-Displays all contacts.
-
----
-
-## Test Case 2 – Search Contact
+## Test Case 1 – Search by Name
 
 ### Input
 
 ```
-Keyword : A
+Rah
 ```
 
 ### Expected Output
 
-Displays contacts whose names contain "A".
-
----
-
-## Test Case 3 – Bulk Delete
-
-### Input
-
 ```
-Ajay
 Rahul
 ```
 
+---
+
+## Test Case 2 – Search by Phone
+
+### Input
+
+```
+7777
+```
+
 ### Expected Output
 
 ```
-Bulk Delete Successful
+Ajay
 ```
-
-Both contacts are removed.
 
 ---
 
-## Test Case 4 – Export Contacts
+## Test Case 3 – Search by Email
+
+### Input
+
+```
+gmail
+```
+
+### Expected Output
+
+Displays contacts having Gmail addresses.
+
+---
+
+## Test Case 4 – Invalid Search
+
+### Input
+
+```
+XYZ
+```
 
 ### Expected Output
 
 ```
-Name | Phone | Email
+No Contact Found
 ```
-
-All remaining contacts are displayed.
 
 ---
 
-## Test Case 5 – Login Validation
+## Test Case 5 – User Not Logged In
 
 ### Expected Output
 
@@ -255,14 +323,13 @@ Please login first
 
 # Outcome
 
-Successfully implemented **UC8 – Bulk Operations** using the **Composite Design Pattern**.
+Successfully implemented **UC9 – Advanced Contact Search** using the **Specification Pattern** and **Chain of Responsibility Pattern**.
 
 The implementation demonstrates:
 
-- Composite Pattern
+- Specification Pattern
+- Chain of Responsibility Pattern
 - Stream API
 - Lambda Expressions
-- Method References
-- Batch Processing
-- Collection Operations
-- Clean and reusable object-oriented design following the Open/Closed Principle (OCP).
+- Case-insensitive searching
+- Clean and extensible search architecture

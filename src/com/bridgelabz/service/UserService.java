@@ -16,6 +16,10 @@ import com.bridgelabz.observer.NotificationObserver;
 import com.bridgelabz.repository.UserRepository;
 import com.bridgelabz.util.PasswordHasher;
 import com.bridgelabz.composite.SingleContact;
+import com.bridgelabz.search.EmailCriteria;
+import com.bridgelabz.search.NameCriteria;
+import com.bridgelabz.search.PhoneCriteria;
+import com.bridgelabz.search.SearchHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -345,6 +349,37 @@ public class UserService {
         result.forEach(group::add);
 
         group.showDetails();
+    }
+
+    public void searchContacts(User loggedInUser, String keyword) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        SearchHandler nameHandler = new SearchHandler(new NameCriteria());
+        SearchHandler phoneHandler = new SearchHandler(new PhoneCriteria());
+        SearchHandler emailHandler = new SearchHandler(new EmailCriteria());
+
+        nameHandler.setNext(phoneHandler);
+        phoneHandler.setNext(emailHandler);
+
+        List<Contact> result = nameHandler.search(loggedInUser.getContacts(), keyword);
+
+        if (result.isEmpty()) {
+            System.out.println("No Contact Found");
+            return;
+        }
+
+        System.out.println("\n===== SEARCH RESULT =====");
+
+        result.forEach(contact -> {
+            System.out.println("----------------------------");
+            System.out.println("Name  : " + contact.getName());
+            System.out.println("Phone : " + contact.getPhoneNumber());
+            System.out.println("Email : " + contact.getEmail());
+        });
     }
 
 

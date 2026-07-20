@@ -1,10 +1,7 @@
 package com.test;
 
-import com.bridgelabz.model.Contact;
 import com.bridgelabz.model.User;
 import com.bridgelabz.service.UserService;
-
-import java.util.List;
 
 public class ManualTest {
 
@@ -12,40 +9,34 @@ public class ManualTest {
 
         UserService service = new UserService();
 
-        service.register(
-                "Aryan",
-                "aryan@gmail.com",
-                "Aryan@9907",
-                "Aryan@9907");
-
-        User user =
-                service.login(
+        System.out.println(
+                service.register(
+                        "Aryan",
                         "aryan@gmail.com",
-                        "Aryan@9907");
+                        "Aryan@9907",
+                        "Aryan@9907"
+                )
+        );
 
-        service.addContact(user,"Ramesh","9999999999","ram@gmail.com");
-        service.addContact(user,"Rahul","8888888888","rahul@gmail.com");
-        service.addContact(user,"Ajay","7777777777","ajay@gmail.com");
-        service.addContact(user,"Amit","6666666666","amit@gmail.com");
+        User user = service.login(
+                "aryan@gmail.com",
+                "Aryan@9907"
+        );
 
-        System.out.println("------ BULK VIEW ------");
-        service.viewBulkContacts(user);
+        service.addContact(user, "Ramesh", "9999999999", "ramesh@gmail.com");
+        service.addContact(user, "Rahul", "8888888888", "rahul@yahoo.com");
+        service.addContact(user, "Ajay", "7777777777", "ajay@gmail.com");
 
-        System.out.println("\n------ SEARCH 'A' ------");
-        service.searchContact(user,"A");
+        System.out.println("\nSearch by Name");
+        service.searchContacts(user, "Rah");
 
-        System.out.println("\n------ BULK DELETE ------");
-        service.bulkDeleteContacts(
-                user,
-                List.of("Ajay","Rahul"));
+        System.out.println("\nSearch by Phone");
+        service.searchContacts(user, "7777");
 
-        System.out.println("\n------ AFTER DELETE ------");
-        service.viewBulkContacts(user);
+        System.out.println("\nSearch by Email");
+        service.searchContacts(user, "yahoo");
 
-        System.out.println("\n------ EXPORT ------");
-        service.exportContacts(user);
-
-
-
+        System.out.println("\nSearch Invalid");
+        service.searchContacts(user, "XYZ");
     }
 }
