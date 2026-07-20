@@ -14,6 +14,7 @@ import com.bridgelabz.model.User;
 import com.bridgelabz.observer.ContactDeleteSubject;
 import com.bridgelabz.observer.NotificationObserver;
 import com.bridgelabz.repository.UserRepository;
+import com.bridgelabz.tag.TagService;
 import com.bridgelabz.util.PasswordHasher;
 import com.bridgelabz.composite.SingleContact;
 import com.bridgelabz.search.EmailCriteria;
@@ -36,6 +37,7 @@ import static com.bridgelabz.validations.Validation.*;
 public class UserService {
 
     private final UserRepository repository = new UserRepository();
+    private final TagService tagService = new TagService();
     private final CommandManager commandManager = new CommandManager();
     private final ContactDeleteSubject deleteSubject = new ContactDeleteSubject();
 
@@ -428,10 +430,71 @@ public class UserService {
             System.out.println("Name          : " + contact.getName());
             System.out.println("Phone         : " + contact.getPhoneNumber());
             System.out.println("Email         : " + contact.getEmail());
-            System.out.println("Tag           : " + contact.getTag());
+            System.out.println("Tag           : " + contact.getTags());
             System.out.println("Date Added    : " + contact.getDateAdded());
             System.out.println("Contact Count : " + contact.getContactCount());
         });
+    }
+
+    public String addTag(User loggedInUser,
+                         String contactId,
+                         String tagName) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            if (contact.getId().equals(contactId)) {
+
+                return tagService.addTag(contact, tagName);
+
+            }
+        }
+
+        return "Contact Not Found";
+    }
+
+    public String removeTag(User loggedInUser,
+                            String contactId,
+                            String tagName) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            if (contact.getId().equals(contactId)) {
+
+                return tagService.removeTag(contact, tagName);
+
+            }
+        }
+
+        return "Contact Not Found";
+    }
+
+    public void viewTags(User loggedInUser,
+                         String contactId) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        for (Contact contact : loggedInUser.getContacts()) {
+
+            if (contact.getId().equals(contactId)) {
+
+                tagService.viewTags(contact);
+                return;
+
+            }
+        }
+
+        System.out.println("Contact Not Found");
     }
 
 

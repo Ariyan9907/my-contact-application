@@ -1,138 +1,136 @@
-# UC10 – Advanced Filtering using Strategy Pattern and Composite Pattern
+# UC11 – Create and Manage Tags using Flyweight Pattern
 
 ## Objective
 
-Implement an **Advanced Filtering** feature that enables a logged-in user to filter contacts based on multiple criteria such as **Tag**, **Date Added**, and **Frequently Contacted** using the **Strategy Pattern** and **Composite Pattern**.
+Implement a **Tag Management** feature that allows a logged-in user to create, assign, remove, and view tags for contacts. The implementation uses the **Flyweight Design Pattern** to share tag objects between multiple contacts, reducing memory usage and avoiding duplicate tag instances.
 
 ---
 
 # Features
 
-- Filter contacts by Tag.
-- Filter contacts by Date Added.
-- Sort contacts based on Frequently Contacted.
-- Combine multiple filters.
-- Validate logged-in user before filtering.
-- Display filtered contacts.
+- Create custom tags.
+- Assign one or more tags to a contact.
+- Remove tags from a contact.
+- View all tags assigned to a contact.
+- Prevent duplicate tags using `HashSet`.
+- Reuse existing tag objects using the Flyweight Pattern.
 
 ---
 
 # Classes Used
 
-## ContactFilter
+## Tag
 
-Acts as the Strategy Interface.
+Represents a tag object.
+
+### Responsibilities
+
+- Store the tag name.
+- Override `equals()` for duplicate detection.
+- Override `hashCode()` for proper HashSet behavior.
+- Override `toString()` for displaying tags.
+
+---
+
+## TagFactory
+
+Implements the **Flyweight Pattern**.
+
+### Responsibilities
+
+- Create a tag if it does not already exist.
+- Return the existing tag if it has already been created.
+- Share the same tag object among multiple contacts.
 
 ### Method
 
 ```java
-List<Contact> filter(List<Contact> contacts);
+getTag(String name)
 ```
 
-Responsibilities:
-
-- Defines a common filtering method.
-- Allows multiple filtering algorithms.
-
 ---
 
-## TagFilter
+## TagValidator
 
-Implements `ContactFilter`.
+Validates user input.
 
-Responsibilities:
+### Responsibilities
 
-- Filters contacts by Tag.
+- Check for null tags.
+- Check for empty or blank tag names.
 
----
-
-## DateFilter
-
-Implements `ContactFilter`.
-
-Responsibilities:
-
-- Filters contacts by Date Added.
-
----
-
-## FrequentContactFilter
-
-Implements `ContactFilter`.
-
-Responsibilities:
-
-- Sorts contacts according to contact frequency.
-
-Uses:
-
-- Comparator
-- Stream API
-
----
-
-## CompositeFilter
-
-Implements `ContactFilter`.
-
-Responsibilities:
-
-- Stores multiple filters.
-- Executes each filter sequentially.
-- Returns the final filtered result.
-
-Methods
+### Method
 
 ```java
-addFilter(ContactFilter filter)
+isValid(String tagName)
 ```
 
-Adds a new filter.
+---
+
+## TagService
+
+Handles all tag operations.
+
+### Responsibilities
+
+- Add tag to a contact.
+- Remove tag from a contact.
+- Display all tags of a contact.
+
+### Methods
 
 ```java
-filter(List<Contact> contacts)
+addTag(Contact contact, String tagName)
 ```
 
-Applies all filters one after another.
+```java
+removeTag(Contact contact, String tagName)
+```
+
+```java
+viewTags(Contact contact)
+```
 
 ---
 
 ## Contact
 
-Added new fields:
+Updated to support multiple tags.
+
+### New Field
 
 ```java
-private String tag;
-private LocalDate dateAdded;
-private int contactCount;
+private Set<Tag> tags = new HashSet<>();
 ```
 
-These fields support advanced filtering.
+This creates a **many-to-many relationship**:
+
+- One contact can have many tags.
+- One tag object can belong to many contacts.
 
 ---
 
 ## ContactFactory
 
-Updated to initialize:
-
-- Default Tag
-- Current Date
-- Contact Count = 0
+Updated to support the modified `Contact` constructor after introducing multiple tags.
 
 ---
 
 ## UserService
 
-Added:
+Added methods:
 
-### filterContacts()
+### addTag()
 
-Responsibilities:
+Assigns a tag to a contact.
 
-- Validate logged-in user.
-- Dynamically create filters.
-- Combine filters using Composite Pattern.
-- Display filtered contacts.
+### removeTag()
+
+Removes a tag from a contact.
+
+### viewTags()
+
+Displays all tags assigned to a contact.
 
 ---
 
@@ -142,13 +140,11 @@ Demonstrates:
 
 - User Registration
 - Login
-- Add Contacts
-- Assign Tags
-- Update Contact Count
-- Filter by Tag
-- Filter by Date
-- Sort by Frequently Contacted
-- Combine Multiple Filters
+- Add Contact
+- Add Multiple Tags
+- View Tags
+- Remove Tag
+- View Updated Tags
 
 ---
 
@@ -158,121 +154,113 @@ Demonstrates:
 User Login
       │
       ▼
-Choose Filters
+Select Contact
       │
       ▼
-Create CompositeFilter
+Enter Tag
       │
-      ├───────────────┐
-      ▼               ▼
- Tag Filter      Date Filter
-      │               │
-      └───────┬───────┘
-              ▼
- Frequency Sort
-              │
-              ▼
-Display Filtered Contacts
+      ▼
+TagValidator
+      │
+      ▼
+TagFactory
+      │
+      ▼
+Existing Tag?
+   │
+ ┌─┴────────────┐
+ │              │
+Yes            No
+ │              │
+ ▼              ▼
+Reuse Tag    Create Tag
+      │
+      ▼
+Add Tag to Contact
+      │
+      ▼
+Display Result
 ```
 
 ---
 
-# Design Patterns Used
+# Flyweight Pattern
 
-## Strategy Pattern
-
-Each filter implements its own filtering algorithm.
-
-```text
-ContactFilter
-      ▲
-      │
- ┌────┼──────────────┐
- ▼    ▼              ▼
-Tag  Date     Frequent Contact
+```
+                 TagFactory
+                      │
+      ┌───────────────┴───────────────┐
+      ▼                               ▼
+ Family Tag                     Friends Tag
+      │                               │
+ ┌────┴────┐                    ┌─────┴─────┐
+ ▼         ▼                    ▼           ▼
+Contact1 Contact2          Contact2    Contact3
 ```
 
-Benefits:
-
-- Loose Coupling
-- Easy to extend
-- Reusable filtering logic
-
----
-
-## Composite Pattern
-
-Combines multiple filters into a single object.
-
-```text
-CompositeFilter
-      │
-      ├── TagFilter
-      ├── DateFilter
-      └── FrequentContactFilter
-```
-
-Benefits:
-
-- Multi-level filtering
-- Easy combination of strategies
-- Cleaner code
+Only one object is created for each unique tag and shared across contacts.
 
 ---
 
 # Java Concepts Used
 
-## Stream API
+## HashSet
 
 ```java
-contacts.stream()
+Set<Tag> tags = new HashSet<>();
 ```
+
+Ensures unique tags for every contact.
 
 ---
 
-## filter()
+## equals()
 
 ```java
-.filter(...)
+equals(Object obj)
 ```
+
+Determines when two tag objects are considered equal.
 
 ---
 
-## sorted()
+## hashCode()
 
 ```java
-.sorted(...)
+hashCode()
 ```
+
+Ensures duplicate tags are not stored in the HashSet.
 
 ---
 
-## Comparator
+## HashMap
 
 ```java
-Comparator.comparingInt(Contact::getContactCount)
+Map<String, Tag>
 ```
+
+Used inside `TagFactory` to store and reuse Flyweight objects.
 
 ---
 
-## Lambda Expressions
+## Many-to-Many Relationship
 
-```java
-contact -> contact.getTag().equalsIgnoreCase(tag)
+```
+Contact
+   ▲
+   │
+   │
+Tag
 ```
 
----
-
-## Functional Interface
-
-```java
-ContactFilter
-```
+A contact can have multiple tags, and the same tag can be shared among multiple contacts.
 
 ---
 
 # Testing
 
-## Test Case 1 – Filter by Tag
+## Test Case 1 – Add Tag
 
 ### Input
 
@@ -282,48 +270,72 @@ Family
 
 ### Expected Output
 
-Displays only contacts having the tag **Family**.
+```
+Tag Added Successfully
+```
 
 ---
 
-## Test Case 2 – Filter by Date
+## Test Case 2 – Add Multiple Tags
 
 ### Input
 
 ```
-LocalDate.now()
+Family
+Friends
 ```
 
 ### Expected Output
 
-Displays contacts added on today's date.
+```
+Tags : [Family, Friends]
+```
 
 ---
 
-## Test Case 3 – Sort by Frequently Contacted
-
-### Expected Output
-
-Displays contacts in descending order of contact count.
-
----
-
-## Test Case 4 – Multiple Filters
+## Test Case 3 – Remove Tag
 
 ### Input
 
 ```
-Tag = Office
-Sort by Frequency = true
+Friends
 ```
 
 ### Expected Output
 
-Displays Office contacts sorted by contact count.
+```
+Tag Removed Successfully
+```
 
 ---
 
-## Test Case 5 – User Not Logged In
+## Test Case 4 – View Tags
+
+### Expected Output
+
+```
+Tags : [Family]
+```
+
+---
+
+## Test Case 5 – Invalid Tag
+
+### Input
+
+```
+""
+```
+
+### Expected Output
+
+```
+Invalid Tag
+```
+
+---
+
+## Test Case 6 – User Not Logged In
 
 ### Expected Output
 
@@ -335,16 +347,16 @@ Please login first
 
 # Outcome
 
-Successfully implemented **UC10 – Advanced Filtering** using the **Strategy Pattern** and **Composite Pattern**.
+Successfully implemented **UC11 – Create and Manage Tags** using the **Flyweight Design Pattern**.
 
 The implementation demonstrates:
 
-- Strategy Pattern
-- Composite Pattern
-- Comparator
-- Stream API
-- Lambda Expressions
-- Functional Interface
-- Multi-level Filtering
-- Dynamic Filter Composition
-- Clean and extensible design following SOLID principles.
+- Flyweight Pattern
+- HashSet
+- HashMap
+- equals()
+- hashCode()
+- Many-to-Many Relationship
+- Validation
+- Object Sharing
+- Clean and reusable object-oriented design following SOLID principles.

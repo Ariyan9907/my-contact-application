@@ -1,7 +1,11 @@
 package com.bridgelabz.model;
 
+import com.bridgelabz.tag.Tag;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Contact {
 
@@ -12,7 +16,7 @@ public class Contact {
     private LocalDateTime createdAt;
 
     // UC10 Fields
-    private String tag;
+    private Set<Tag> tags = new HashSet<>();
     private LocalDate dateAdded;
     private int contactCount;
 
@@ -21,7 +25,6 @@ public class Contact {
                    String phoneNumber,
                    String email,
                    LocalDateTime createdAt,
-                   String tag,
                    LocalDate dateAdded,
                    int contactCount) {
 
@@ -30,7 +33,6 @@ public class Contact {
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.createdAt = createdAt;
-        this.tag = tag;
         this.dateAdded = dateAdded;
         this.contactCount = contactCount;
     }
@@ -55,9 +57,7 @@ public class Contact {
         return createdAt;
     }
 
-    public String getTag() {
-        return tag;
-    }
+
 
     public LocalDate getDateAdded() {
         return dateAdded;
@@ -79,9 +79,6 @@ public class Contact {
         this.email = email;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
 
     public void setDateAdded(LocalDate dateAdded) {
         this.dateAdded = dateAdded;
@@ -89,5 +86,9 @@ public class Contact {
 
     public void setContactCount(int contactCount) {
         this.contactCount = contactCount;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
     }
 }

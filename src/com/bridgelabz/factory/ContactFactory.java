@@ -18,9 +18,8 @@ public class ContactFactory {
                 phoneNumber,
                 email,
                 LocalDateTime.now(),
-                "General",          // Default Tag
-                LocalDate.now(),    // Date Added
-                0                   // Initially not contacted
+                LocalDate.now(),
+                0
         );
     }
 }

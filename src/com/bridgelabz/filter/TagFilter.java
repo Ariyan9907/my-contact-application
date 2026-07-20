@@ -18,7 +18,8 @@ public class TagFilter implements ContactFilter {
 
         return contacts.stream()
                 .filter(contact ->
-                        contact.getTag().equalsIgnoreCase(tag))
+                        contact.getTags().stream()
+                                .anyMatch(t -> t.getName().equalsIgnoreCase(tag)))
                 .collect(Collectors.toList());
 
     }
