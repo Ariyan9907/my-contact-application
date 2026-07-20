@@ -1,136 +1,109 @@
-# UC11 – Create and Manage Tags using Flyweight Pattern
+# UC12 – Apply Tags to Contacts using Observer Pattern
 
 ## Objective
 
-Implement a **Tag Management** feature that allows a logged-in user to create, assign, remove, and view tags for contacts. The implementation uses the **Flyweight Design Pattern** to share tag objects between multiple contacts, reducing memory usage and avoiding duplicate tag instances.
+Implement the **Apply Tags to Contacts** feature that allows a logged-in user to assign or remove one or more tags from contacts. The implementation uses the **Observer Pattern** to notify the system whenever tags are added or removed from a contact.
 
 ---
 
 # Features
 
-- Create custom tags.
-- Assign one or more tags to a contact.
+- Assign one or multiple tags to a contact.
 - Remove tags from a contact.
-- View all tags assigned to a contact.
-- Prevent duplicate tags using `HashSet`.
-- Reuse existing tag objects using the Flyweight Pattern.
+- View tags assigned to a contact.
+- Notify observers whenever tags are updated.
+- Support multiple tags using `Set<Tag>`.
 
 ---
 
 # Classes Used
 
-## Tag
+## TagObserver
 
-Represents a tag object.
-
-### Responsibilities
-
-- Store the tag name.
-- Override `equals()` for duplicate detection.
-- Override `hashCode()` for proper HashSet behavior.
-- Override `toString()` for displaying tags.
-
----
-
-## TagFactory
-
-Implements the **Flyweight Pattern**.
-
-### Responsibilities
-
-- Create a tag if it does not already exist.
-- Return the existing tag if it has already been created.
-- Share the same tag object among multiple contacts.
+Acts as the Observer Interface.
 
 ### Method
 
 ```java
-getTag(String name)
+void update(Contact contact, String message);
+```
+
+Responsibilities:
+
+- Receive notifications whenever a tag is added or removed.
+
+---
+
+## TagNotificationObserver
+
+Implements `TagObserver`.
+
+Responsibilities:
+
+- Display notification messages whenever tag assignments change.
+
+Example:
+
+```
+===== TAG NOTIFICATION =====
+Family tag added to Rahul
 ```
 
 ---
 
-## TagValidator
+## TagSubject
 
-Validates user input.
+Acts as the Subject (Publisher).
 
-### Responsibilities
+Responsibilities:
 
-- Check for null tags.
-- Check for empty or blank tag names.
+- Register observers.
+- Remove observers.
+- Notify observers whenever a tag operation occurs.
 
-### Method
+### Methods
 
 ```java
-isValid(String tagName)
+addObserver(TagObserver observer)
+```
+
+```java
+removeObserver(TagObserver observer)
+```
+
+```java
+notifyObservers(Contact contact, String message)
 ```
 
 ---
 
 ## TagService
 
-Handles all tag operations.
+Updated to:
 
-### Responsibilities
+### addTag()
 
-- Add tag to a contact.
-- Remove tag from a contact.
-- Display all tags of a contact.
+- Validate tag.
+- Add tag to contact.
+- Notify observers.
 
-### Methods
+### removeTag()
 
-```java
-addTag(Contact contact, String tagName)
-```
+- Remove tag.
+- Notify observers.
 
-```java
-removeTag(Contact contact, String tagName)
-```
+### viewTags()
 
-```java
-viewTags(Contact contact)
-```
-
----
-
-## Contact
-
-Updated to support multiple tags.
-
-### New Field
-
-```java
-private Set<Tag> tags = new HashSet<>();
-```
-
-This creates a **many-to-many relationship**:
-
-- One contact can have many tags.
-- One tag object can belong to many contacts.
-
----
-
-## ContactFactory
-
-Updated to support the modified `Contact` constructor after introducing multiple tags.
+- Display all tags assigned to a contact.
 
 ---
 
 ## UserService
 
-Added methods:
+Updated to:
 
-### addTag()
-
-Assigns a tag to a contact.
-
-### removeTag()
-
-Removes a tag from a contact.
-
-### viewTags()
-
-Displays all tags assigned to a contact.
+- Register `TagNotificationObserver`.
+- Delegate tag operations to `TagService`.
 
 ---
 
@@ -141,10 +114,10 @@ Demonstrates:
 - User Registration
 - Login
 - Add Contact
-- Add Multiple Tags
+- Assign Multiple Tags
 - View Tags
 - Remove Tag
-- View Updated Tags
+- Observer Notification
 
 ---
 
@@ -157,104 +130,71 @@ User Login
 Select Contact
       │
       ▼
-Enter Tag
+Add / Remove Tag
       │
       ▼
-TagValidator
+TagService
       │
       ▼
-TagFactory
+TagSubject
       │
       ▼
-Existing Tag?
-   │
- ┌─┴────────────┐
- │              │
-Yes            No
- │              │
- ▼              ▼
-Reuse Tag    Create Tag
+Notify Observers
       │
       ▼
-Add Tag to Contact
+TagNotificationObserver
       │
       ▼
-Display Result
+Display Notification
 ```
 
 ---
 
-# Flyweight Pattern
+# Observer Pattern Flow
 
+```text
+              TagService
+                  │
+                  ▼
+             TagSubject
+                  │
+        ┌─────────┴─────────┐
+        ▼                   ▼
+TagNotificationObserver   Future Observers
+                              │
+                     ┌────────┴────────┐
+                     ▼                 ▼
+                 Logger          EmailNotifier
 ```
-                 TagFactory
-                      │
-      ┌───────────────┴───────────────┐
-      ▼                               ▼
- Family Tag                     Friends Tag
-      │                               │
- ┌────┴────┐                    ┌─────┴─────┐
- ▼         ▼                    ▼           ▼
-Contact1 Contact2          Contact2    Contact3
-```
-
-Only one object is created for each unique tag and shared across contacts.
 
 ---
 
 # Java Concepts Used
 
-## HashSet
+## Set Operations
 
 ```java
-Set<Tag> tags = new HashSet<>();
+contact.getTags().add(tag);
+```
+
+```java
+contact.getTags().remove(tag);
 ```
 
 Ensures unique tags for every contact.
 
 ---
 
-## equals()
+## Bidirectional Relationship
 
-```java
-equals(Object obj)
-```
-
-Determines when two tag objects are considered equal.
+- One contact can have multiple tags.
+- One tag can be shared by multiple contacts.
 
 ---
 
-## hashCode()
+## Observer Pattern
 
-```java
-hashCode()
-```
-
-Ensures duplicate tags are not stored in the HashSet.
-
----
-
-## HashMap
-
-```java
-Map<String, Tag>
-```
-
-Used inside `TagFactory` to store and reuse Flyweight objects.
-
----
-
-## Many-to-Many Relationship
-
-```
-Contact
-   ▲
-   │
-   │
-Tag
-```
-
-A contact can have multiple tags, and the same tag can be shared among multiple contacts.
+Automatically notifies all registered observers whenever a tag is added or removed.
 
 ---
 
@@ -272,6 +212,9 @@ Family
 
 ```
 Tag Added Successfully
+
+===== TAG NOTIFICATION =====
+Family tag added to Rahul
 ```
 
 ---
@@ -305,6 +248,9 @@ Friends
 
 ```
 Tag Removed Successfully
+
+===== TAG NOTIFICATION =====
+Friends tag removed from Rahul
 ```
 
 ---
@@ -319,23 +265,7 @@ Tags : [Family]
 
 ---
 
-## Test Case 5 – Invalid Tag
-
-### Input
-
-```
-""
-```
-
-### Expected Output
-
-```
-Invalid Tag
-```
-
----
-
-## Test Case 6 – User Not Logged In
+## Test Case 5 – User Not Logged In
 
 ### Expected Output
 
@@ -347,16 +277,14 @@ Please login first
 
 # Outcome
 
-Successfully implemented **UC11 – Create and Manage Tags** using the **Flyweight Design Pattern**.
+Successfully implemented **UC12 – Apply Tags to Contacts** using the **Observer Pattern**.
 
 The implementation demonstrates:
 
-- Flyweight Pattern
-- HashSet
-- HashMap
-- equals()
-- hashCode()
-- Many-to-Many Relationship
-- Validation
-- Object Sharing
-- Clean and reusable object-oriented design following SOLID principles.
+- Observer Pattern
+- Set Operations
+- Bidirectional Relationship Management
+- Multiple Tag Assignment
+- Event Notification
+- Clean separation between business logic and notification logic
+- Extensible design following the Open/Closed Principle (OCP)
