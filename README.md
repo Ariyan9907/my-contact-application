@@ -1,91 +1,103 @@
-# UC6 – Edit Contact with Undo/Redo (Command Pattern)
+# UC7 – Delete Contact using Observer Pattern
 
 ## Objective
 
-Implement the **Edit Contact** feature using the **Command Design Pattern**. This enables users to update contact information while supporting **Undo** and **Redo** operations without directly modifying the contact from the service layer.
+Implement the **Delete Contact** feature using the **Observer Design Pattern**. This enables the application to notify interested components whenever a contact is deleted while keeping the deletion logic separate from notification logic.
 
 ---
 
 # Features
 
-- Edit an existing contact.
-- Validate updated contact details.
-- Undo the last contact update.
-- Redo the previously undone update.
-- Maintain command history using stacks.
-- Separate edit logic from business logic using the Command Pattern.
+- Delete an existing contact.
+- Validate logged-in user before deletion.
+- Notify observers after successful deletion.
+- Demonstrate loose coupling using the Observer Pattern.
+- Allow future observers (Email, Logger, Audit, etc.) to be added without modifying the service layer.
 
 ---
 
 # Classes Used
 
-## `Command`
+## `ContactObserver`
 
-- Interface representing a command.
-- Declares:
-  ```java
-  void execute();
-  void undo();
-  ```
+An interface representing an observer.
 
----
+### Method
 
-## `EditContactCommand`
-
-Implements `Command`.
+```java
+void update(Contact contact);
+```
 
 Responsibilities:
 
-- Store old contact details.
-- Store new contact details.
-- Execute the update.
-- Restore previous values during Undo.
+- Receive notification whenever a contact is deleted.
 
 ---
 
-## `CommandManager`
+## `NotificationObserver`
+
+Implements `ContactObserver`.
 
 Responsibilities:
 
-- Execute commands.
-- Maintain Undo history.
-- Maintain Redo history.
-- Perform Undo.
-- Perform Redo.
+- Display a notification after a contact is deleted.
 
-Uses:
+Example:
 
-- `Stack<Command> undoStack`
-- `Stack<Command> redoStack`
+```text
+===== NOTIFICATION =====
+Deleted Contact : Ramesh
+```
+
+---
+
+## `ContactDeleteSubject`
+
+Acts as the Subject (Publisher).
+
+Responsibilities:
+
+- Register observers.
+- Remove observers.
+- Notify all registered observers after deletion.
+
+### Methods
+
+```java
+addObserver(ContactObserver observer)
+```
+
+```java
+removeObserver(ContactObserver observer)
+```
+
+```java
+notifyObservers(Contact contact)
+```
 
 ---
 
 ## `UserService`
 
-Updated Methods:
+Updated:
 
-### `updateContact()`
+### Constructor
 
-- Validate user.
-- Validate contact details.
-- Create an `EditContactCommand`.
-- Execute the command using `CommandManager`.
-
-### `undoLastEdit()`
-
-Calls:
+Registers observers.
 
 ```java
-commandManager.undo();
+deleteSubject.addObserver(new NotificationObserver());
 ```
 
-### `redoLastEdit()`
+### `deleteContact()`
 
-Calls:
+Responsibilities:
 
-```java
-commandManager.redo();
-```
+- Validate logged-in user.
+- Find the contact.
+- Remove the contact.
+- Notify all observers.
+- Return success message.
 
 ---
 
@@ -93,15 +105,13 @@ commandManager.redo();
 
 Updated to:
 
-- Register a user.
+- Register user.
 - Login.
-- Add a contact.
-- Update the contact.
-- Display updated contact.
-- Undo the update.
-- Display restored contact.
-- Redo the update.
-- Display updated contact again.
+- Add contacts.
+- Display contacts.
+- Delete a contact.
+- Notify observers.
+- Display remaining contacts.
 
 ---
 
@@ -111,103 +121,69 @@ Updated to:
 User Login
       │
       ▼
+View Contact List
+      │
+      ▼
 Select Contact
       │
       ▼
-Update Contact
+Delete Contact
       │
       ▼
-Create EditContactCommand
+ContactDeleteSubject
       │
       ▼
-CommandManager.executeCommand()
+Notify Observers
       │
       ▼
-Contact Updated
+NotificationObserver
       │
-      ├──────────────┐
-      ▼              ▼
-Undo           Redo
+      ▼
+Display Notification
 ```
 
 ---
 
-# Command Pattern Flow
+# Observer Pattern Flow
 
 ```text
-               UserService
-                    │
-                    ▼
-         EditContactCommand
-                    │
-        execute() / undo()
-                    │
-                    ▼
-            CommandManager
-             │          │
-             ▼          ▼
-        Undo Stack   Redo Stack
+                 UserService
+                      │
+                      ▼
+          ContactDeleteSubject
+             │             │
+             ▼             ▼
+ NotificationObserver   Future Observers
+                             │
+                    ┌────────┴────────┐
+                    ▼                 ▼
+              EmailObserver     LogObserver
 ```
 
 ---
 
 # Testing
 
-## Test Case 1 – Update Contact
+## Test Case 1 – Delete Existing Contact
 
 ### Input
 
 ```text
-Name  : Rajesh
-Phone : 9999999999
-Email : rajesh@gmail.com
+Contact ID : Valid Contact ID
 ```
 
 ### Expected Output
 
 ```text
-Contact Updated Successfully
+Contact Deleted Successfully
+
+===== NOTIFICATION =====
+Deleted Contact : Ramesh
 ```
 
 ---
 
-## Test Case 2 – Undo Update
-
-### Action
-
-```text
-Undo
-```
-
-### Expected Output
-
-```text
-Undo Successful
-```
-
-Contact details should return to their previous values.
-
----
-
-## Test Case 3 – Redo Update
-
-### Action
-
-```text
-Redo
-```
-
-### Expected Output
-
-```text
-Redo Successful
-```
-
-Updated contact details should be restored.
-
----
-
-## Test Case 4 – Invalid Contact ID
+## Test Case 2 – Invalid Contact ID
 
 ### Expected Output
 
@@ -217,7 +193,7 @@ Contact Not Found
 
 ---
 
-## Test Case 5 – Invalid User
+## Test Case 3 – User Not Logged In
 
 ### Expected Output
 
@@ -227,37 +203,45 @@ Please login first
 
 ---
 
-## Test Case 6 – Invalid Email
+## Test Case 4 – Verify Contact Removal
 
-### Expected Output
+### Before Delete
 
 ```text
-Invalid Contact Email
+1. Ramesh
+2. Rahul
+```
+
+### After Delete
+
+```text
+1. Rahul
 ```
 
 ---
 
-## Test Case 7 – Invalid Name
+## Test Case 5 – Observer Notification
 
 ### Expected Output
 
 ```text
-Invalid Contact Name
+===== NOTIFICATION =====
+Deleted Contact : Ramesh
 ```
 
 ---
 
 # Outcome
 
-Successfully implemented **UC6 – Edit Contact with Undo/Redo** using the **Command Design Pattern**.
+Successfully implemented **UC7 – Delete Contact** using the **Observer Design Pattern**.
 
 The implementation demonstrates:
 
-- Encapsulation of edit operations as command objects.
-- Separation of business logic from edit execution.
-- Support for multiple Undo and Redo operations.
-- Easy extensibility for future commands such as Add Contact, Delete Contact, and Restore Contact.
-- Compliance with the **Single Responsibility Principle (SRP)** and **Open/Closed Principle (OCP)**.
+- Separation of deletion and notification logic.
+- Loose coupling between service and observers.
+- Easy extensibility for additional observers.
+- Better maintainability following the **Open/Closed Principle (OCP)**.
+- Single Responsibility Principle (SRP) by separating notification behavior from business logic.
 
 ---
 
@@ -266,7 +250,7 @@ The implementation demonstrates:
 ## Create Feature Branch
 
 ```bash
-git checkout -b feature/uc6-edit-contact-command-pattern
+git checkout -b feature/uc7-delete-contact-observer
 ```
 
 ## Stage Changes
@@ -278,25 +262,31 @@ git add .
 ## Commit
 
 ```bash
-git commit -m "[Ariyan Pujari] Implement UC6: Edit Contact with Undo/Redo using Command Pattern"
+git commit -m "[Ariyan Pujari] Implement UC7: Delete Contact using Observer Pattern"
 ```
 
 ## Push Branch
 
 ```bash
-git push origin feature/uc6-edit-contact-command-pattern
+git push -u origin feature/uc7-delete-contact-observer
 ```
 
 ## Merge into Development Branch
 
 ```bash
 git checkout dev
-git merge feature/uc6-edit-contact-command-pattern
+git merge feature/uc7-delete-contact-observer
+```
+
+## Push Development Branch
+
+```bash
+git push origin dev
 ```
 
 ## Delete Feature Branch (Optional)
 
 ```bash
-git branch -d feature/uc6-edit-contact-command-pattern
-git push origin --delete feature/uc6-edit-contact-command-pattern
+git branch -d feature/uc7-delete-contact-observer
+git push origin --delete feature/uc7-delete-contact-observer
 ```

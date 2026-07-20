@@ -10,6 +10,8 @@ import com.bridgelabz.factory.ContactFactory;
 import com.bridgelabz.factory.UserFactory;
 import com.bridgelabz.model.Contact;
 import com.bridgelabz.model.User;
+import com.bridgelabz.observer.ContactDeleteSubject;
+import com.bridgelabz.observer.NotificationObserver;
 import com.bridgelabz.repository.UserRepository;
 import com.bridgelabz.util.PasswordHasher;
 
@@ -21,6 +23,13 @@ public class UserService {
 
     private final UserRepository repository = new UserRepository();
     private final CommandManager commandManager = new CommandManager();
+    private final ContactDeleteSubject deleteSubject = new ContactDeleteSubject();
+
+    public UserService() {
+
+        deleteSubject.addObserver(new NotificationObserver());
+
+    }
 
     public String register(String name,
                            String email,
@@ -191,17 +200,26 @@ public class UserService {
             return "Please login first";
         }
 
+        Contact deletedContact = null;
+
         for (Contact contact : loggedInUser.getContacts()) {
 
             if (contact.getId().equals(contactId)) {
 
-                loggedInUser.getContacts().remove(contact);
-
-                return "Contact Deleted Successfully";
+                deletedContact = contact;
+                break;
             }
         }
 
-        return "Contact Not Found";
+        if (deletedContact == null) {
+            return "Contact Not Found";
+        }
+
+        loggedInUser.getContacts().remove(deletedContact);
+
+        deleteSubject.notifyObservers(deletedContact);
+
+        return "Contact Deleted Successfully";
     }
 
     public void viewContactDetails(User loggedUser, int contactNumber, int choice) {

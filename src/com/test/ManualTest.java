@@ -46,51 +46,39 @@ public class ManualTest {
                         "9886484180",
                         "ram@gmail.com"
                 )
+
         );
-
-        // ==========================
-        // View Before Update
-        // ==========================
-        System.out.println("\n===== BEFORE UPDATE =====");
-        userService.viewContacts(loggedUser);
-
-        // Get Contact ID
-        Contact contact = loggedUser.getContacts().get(0);
-
-        // ==========================
-        // Update Contact
-        // ==========================
         System.out.println(
-                userService.updateContact(
+                userService.addContact(
                         loggedUser,
-                        contact.getId(),
-                        "Rajesh",
-                        "9999999999",
-                        "rajesh@gmail.com"
+                        "Rahul",
+                        "9876543210",
+                        "rahul@gmail.com"
                 )
         );
 
-        // ==========================
-        // View After Update
-        // ==========================
-        System.out.println("\n===== AFTER UPDATE =====");
-        userService.viewContacts(loggedUser);
-
-        // ==========================
-        // Undo
-        // ==========================
-        System.out.println("\n===== UNDO =====");
-        userService.undoLastEdit();
+        System.out.println("\n===== CONTACTS BEFORE DELETE =====");
 
         userService.viewContacts(loggedUser);
 
-        // ==========================
-        // Redo
-        // ==========================
-        System.out.println("\n===== REDO =====");
-        userService.redoLastEdit();
+        Contact contact = loggedUser.getContacts().get(1);
+
+        System.out.println();
+
+        System.out.println(
+                userService.deleteContact(
+                        loggedUser,
+                        contact.getId()
+                )
+        );
+
+        System.out.println();
+
+        System.out.println("===== CONTACTS AFTER DELETE =====");
 
         userService.viewContacts(loggedUser);
+
+
 
     }
 }
