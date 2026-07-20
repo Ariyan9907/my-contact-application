@@ -1,7 +1,7 @@
 package com.bridgelabz.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class Contact {
 
@@ -11,12 +11,28 @@ public class Contact {
     private String email;
     private LocalDateTime createdAt;
 
-    public Contact(String id, String name, String phoneNumber, String email, LocalDateTime createdAt) {
+    // UC10 Fields
+    private String tag;
+    private LocalDate dateAdded;
+    private int contactCount;
+
+    public Contact(String id,
+                   String name,
+                   String phoneNumber,
+                   String email,
+                   LocalDateTime createdAt,
+                   String tag,
+                   LocalDate dateAdded,
+                   int contactCount) {
+
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.createdAt = createdAt;
+        this.tag = tag;
+        this.dateAdded = dateAdded;
+        this.contactCount = contactCount;
     }
 
     public String getId() {
@@ -39,6 +55,18 @@ public class Contact {
         return createdAt;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public LocalDate getDateAdded() {
+        return dateAdded;
+    }
+
+    public int getContactCount() {
+        return contactCount;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -49,5 +77,17 @@ public class Contact {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setDateAdded(LocalDate dateAdded) {
+        this.dateAdded = dateAdded;
+    }
+
+    public void setContactCount(int contactCount) {
+        this.contactCount = contactCount;
     }
 }

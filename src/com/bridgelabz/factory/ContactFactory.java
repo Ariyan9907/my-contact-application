@@ -2,6 +2,7 @@ package com.bridgelabz.factory;
 
 import com.bridgelabz.model.Contact;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,7 +17,10 @@ public class ContactFactory {
                 name,
                 phoneNumber,
                 email,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "General",          // Default Tag
+                LocalDate.now(),    // Date Added
+                0                   // Initially not contacted
         );
     }
 }

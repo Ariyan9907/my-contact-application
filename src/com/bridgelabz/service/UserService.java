@@ -20,6 +20,13 @@ import com.bridgelabz.search.EmailCriteria;
 import com.bridgelabz.search.NameCriteria;
 import com.bridgelabz.search.PhoneCriteria;
 import com.bridgelabz.search.SearchHandler;
+import com.bridgelabz.filter.CompositeFilter;
+import com.bridgelabz.filter.DateFilter;
+import com.bridgelabz.filter.FrequentContactFilter;
+import com.bridgelabz.filter.TagFilter;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -379,6 +386,51 @@ public class UserService {
             System.out.println("Name  : " + contact.getName());
             System.out.println("Phone : " + contact.getPhoneNumber());
             System.out.println("Email : " + contact.getEmail());
+        });
+    }
+
+    public void filterContacts(User loggedInUser,
+                               String tag,
+                               LocalDate date,
+                               boolean sortByFrequency) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        CompositeFilter compositeFilter = new CompositeFilter();
+
+        if (tag != null && !tag.isBlank()) {
+            compositeFilter.addFilter(new TagFilter(tag));
+        }
+
+        if (date != null) {
+            compositeFilter.addFilter(new DateFilter(date));
+        }
+
+        if (sortByFrequency) {
+            compositeFilter.addFilter(new FrequentContactFilter());
+        }
+
+        List<Contact> filteredContacts =
+                compositeFilter.filter(loggedInUser.getContacts());
+
+        if (filteredContacts.isEmpty()) {
+            System.out.println("No Contact Found");
+            return;
+        }
+
+        System.out.println("\n===== FILTERED CONTACTS =====");
+
+        filteredContacts.forEach(contact -> {
+            System.out.println("----------------------------");
+            System.out.println("Name          : " + contact.getName());
+            System.out.println("Phone         : " + contact.getPhoneNumber());
+            System.out.println("Email         : " + contact.getEmail());
+            System.out.println("Tag           : " + contact.getTag());
+            System.out.println("Date Added    : " + contact.getDateAdded());
+            System.out.println("Contact Count : " + contact.getContactCount());
         });
     }
 

@@ -1,93 +1,123 @@
-# UC9 – Search Contacts using Specification Pattern and Chain of Responsibility
+# UC10 – Advanced Filtering using Strategy Pattern and Composite Pattern
 
 ## Objective
 
-Implement an advanced contact search feature that allows a logged-in user to search contacts by **Name**, **Phone Number**, or **Email Address** using the **Specification Pattern** and **Chain of Responsibility Pattern**.
+Implement an **Advanced Filtering** feature that enables a logged-in user to filter contacts based on multiple criteria such as **Tag**, **Date Added**, and **Frequently Contacted** using the **Strategy Pattern** and **Composite Pattern**.
 
 ---
 
 # Features
 
-- Search contacts by name.
-- Search contacts by phone number.
-- Search contacts by email address.
-- Case-insensitive search for name and email.
-- Displays all matching contacts.
-- Validates whether the user is logged in before searching.
+- Filter contacts by Tag.
+- Filter contacts by Date Added.
+- Sort contacts based on Frequently Contacted.
+- Combine multiple filters.
+- Validate logged-in user before filtering.
+- Display filtered contacts.
 
 ---
 
 # Classes Used
 
-## SearchCriteria
+## ContactFilter
 
-Acts as the **Specification Interface**.
+Acts as the Strategy Interface.
 
 ### Method
 
 ```java
-boolean isSatisfied(Contact contact, String keyword);
+List<Contact> filter(List<Contact> contacts);
 ```
 
 Responsibilities:
 
-- Defines the rule for checking whether a contact satisfies a search condition.
+- Defines a common filtering method.
+- Allows multiple filtering algorithms.
 
 ---
 
-## NameCriteria
+## TagFilter
 
-Implements `SearchCriteria`.
+Implements `ContactFilter`.
 
 Responsibilities:
 
-- Checks whether the contact name contains the search keyword.
+- Filters contacts by Tag.
 
 ---
 
-## PhoneCriteria
+## DateFilter
 
-Implements `SearchCriteria`.
+Implements `ContactFilter`.
 
 Responsibilities:
 
-- Checks whether the phone number contains the search keyword.
+- Filters contacts by Date Added.
 
 ---
 
-## EmailCriteria
+## FrequentContactFilter
 
-Implements `SearchCriteria`.
+Implements `ContactFilter`.
 
 Responsibilities:
 
-- Checks whether the email contains the search keyword.
+- Sorts contacts according to contact frequency.
+
+Uses:
+
+- Comparator
+- Stream API
 
 ---
 
-## SearchHandler
+## CompositeFilter
 
-Implements the **Chain of Responsibility Pattern**.
+Implements `ContactFilter`.
 
 Responsibilities:
 
-- Holds a search criteria.
-- Searches contacts using the assigned criteria.
-- Passes the request to the next handler if no match is found.
+- Stores multiple filters.
+- Executes each filter sequentially.
+- Returns the final filtered result.
 
-### Methods
+Methods
 
 ```java
-setNext(SearchHandler nextHandler)
+addFilter(ContactFilter filter)
 ```
 
-Links the next handler in the chain.
+Adds a new filter.
 
 ```java
-search(List<Contact> contacts, String keyword)
+filter(List<Contact> contacts)
 ```
 
-Searches contacts using the current criteria and forwards the request if necessary.
+Applies all filters one after another.
+
+---
+
+## Contact
+
+Added new fields:
+
+```java
+private String tag;
+private LocalDate dateAdded;
+private int contactCount;
+```
+
+These fields support advanced filtering.
+
+---
+
+## ContactFactory
+
+Updated to initialize:
+
+- Default Tag
+- Current Date
+- Contact Count = 0
 
 ---
 
@@ -95,15 +125,14 @@ Searches contacts using the current criteria and forwards the request if necessa
 
 Added:
 
-### searchContacts()
+### filterContacts()
 
 Responsibilities:
 
 - Validate logged-in user.
-- Create the search chain.
-- Perform search.
-- Display matching contacts.
-- Display "No Contact Found" when no matches exist.
+- Dynamically create filters.
+- Combine filters using Composite Pattern.
+- Display filtered contacts.
 
 ---
 
@@ -114,10 +143,12 @@ Demonstrates:
 - User Registration
 - Login
 - Add Contacts
-- Search by Name
-- Search by Phone
-- Search by Email
-- Invalid Search
+- Assign Tags
+- Update Contact Count
+- Filter by Tag
+- Filter by Date
+- Sort by Frequently Contacted
+- Combine Multiple Filters
 
 ---
 
@@ -127,89 +158,65 @@ Demonstrates:
 User Login
       │
       ▼
-Enter Search Keyword
+Choose Filters
       │
       ▼
-Create Search Chain
+Create CompositeFilter
       │
-      ▼
-Name Search
-      │
-      ▼
-Match Found?
-   │
- ┌─┴─────────────┐
- │               │
-Yes             No
- │               │
- ▼               ▼
-Return      Phone Search
-                  │
-                  ▼
-             Match Found?
-                │
-          ┌─────┴─────┐
-          │           │
-         Yes         No
-          │           │
-          ▼           ▼
-      Return     Email Search
-                     │
-                     ▼
-                 Match Found?
-                │
-          ┌─────┴─────┐
-          │           │
-         Yes         No
-          │           │
-          ▼           ▼
-      Return      No Contact Found
+      ├───────────────┐
+      ▼               ▼
+ Tag Filter      Date Filter
+      │               │
+      └───────┬───────┘
+              ▼
+ Frequency Sort
+              │
+              ▼
+Display Filtered Contacts
 ```
 
 ---
 
 # Design Patterns Used
 
-## Specification Pattern
+## Strategy Pattern
 
-Each search condition is implemented independently.
+Each filter implements its own filtering algorithm.
 
 ```text
-SearchCriteria
+ContactFilter
       ▲
       │
- ┌────┼──────────┐
- ▼    ▼          ▼
-Name Phone     Email
+ ┌────┼──────────────┐
+ ▼    ▼              ▼
+Tag  Date     Frequent Contact
 ```
 
 Benefits:
 
-- Single Responsibility Principle
+- Loose Coupling
 - Easy to extend
-- Reusable search conditions
+- Reusable filtering logic
 
 ---
 
-## Chain of Responsibility Pattern
+## Composite Pattern
 
-Each handler gets an opportunity to process the search request.
+Combines multiple filters into a single object.
 
 ```text
-SearchHandler(Name)
-        │
-        ▼
-SearchHandler(Phone)
-        │
-        ▼
-SearchHandler(Email)
+CompositeFilter
+      │
+      ├── TagFilter
+      ├── DateFilter
+      └── FrequentContactFilter
 ```
 
 Benefits:
 
-- Loose coupling
-- Easy to add new search handlers
-- Cleaner search logic
+- Multi-level filtering
+- Easy combination of strategies
+- Cleaner code
 
 ---
 
@@ -223,91 +230,96 @@ contacts.stream()
 
 ---
 
-## Lambda Expression
+## filter()
 
 ```java
-contact -> criteria.isSatisfied(contact, keyword)
+.filter(...)
 ```
 
 ---
 
-## Predicate Logic
+## sorted()
 
-Implemented through the `isSatisfied()` method in each criteria class.
+```java
+.sorted(...)
+```
 
 ---
 
-## Case-Insensitive Search
+## Comparator
 
 ```java
-toLowerCase().contains(keyword.toLowerCase())
+Comparator.comparingInt(Contact::getContactCount)
 ```
 
-Used for searching names and email addresses.
+---
+
+## Lambda Expressions
+
+```java
+contact -> contact.getTag().equalsIgnoreCase(tag)
+```
+
+---
+
+## Functional Interface
+
+```java
+ContactFilter
+```
 
 ---
 
 # Testing
 
-## Test Case 1 – Search by Name
+## Test Case 1 – Filter by Tag
 
 ### Input
 
 ```
-Rah
+Family
 ```
 
 ### Expected Output
 
-```
-Rahul
-```
+Displays only contacts having the tag **Family**.
 
 ---
 
-## Test Case 2 – Search by Phone
+## Test Case 2 – Filter by Date
 
 ### Input
 
 ```
-7777
+LocalDate.now()
 ```
 
 ### Expected Output
 
-```
-Ajay
-```
+Displays contacts added on today's date.
 
 ---
 
-## Test Case 3 – Search by Email
-
-### Input
-
-```
-gmail
-```
+## Test Case 3 – Sort by Frequently Contacted
 
 ### Expected Output
 
-Displays contacts having Gmail addresses.
+Displays contacts in descending order of contact count.
 
 ---
 
-## Test Case 4 – Invalid Search
+## Test Case 4 – Multiple Filters
 
 ### Input
 
 ```
-XYZ
+Tag = Office
+Sort by Frequency = true
 ```
 
 ### Expected Output
 
-```
-No Contact Found
-```
+Displays Office contacts sorted by contact count.
 
 ---
 
@@ -323,13 +335,16 @@ Please login first
 
 # Outcome
 
-Successfully implemented **UC9 – Advanced Contact Search** using the **Specification Pattern** and **Chain of Responsibility Pattern**.
+Successfully implemented **UC10 – Advanced Filtering** using the **Strategy Pattern** and **Composite Pattern**.
 
 The implementation demonstrates:
 
-- Specification Pattern
-- Chain of Responsibility Pattern
+- Strategy Pattern
+- Composite Pattern
+- Comparator
 - Stream API
 - Lambda Expressions
-- Case-insensitive searching
-- Clean and extensible search architecture
+- Functional Interface
+- Multi-level Filtering
+- Dynamic Filter Composition
+- Clean and extensible design following SOLID principles.
