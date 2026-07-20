@@ -1,117 +1,111 @@
-# UC7 – Delete Contact using Observer Pattern
+# UC8 – Bulk Operations using Composite Pattern
 
 ## Objective
 
-Implement the **Delete Contact** feature using the **Observer Design Pattern**. This enables the application to notify interested components whenever a contact is deleted while keeping the deletion logic separate from notification logic.
+Implement **Bulk Operations** that allow a logged-in user to perform actions on multiple contacts efficiently using the **Composite Design Pattern** and Java Stream API.
 
 ---
 
 # Features
 
-- Delete an existing contact.
-- Validate logged-in user before deletion.
-- Notify observers after successful deletion.
-- Demonstrate loose coupling using the Observer Pattern.
-- Allow future observers (Email, Logger, Audit, etc.) to be added without modifying the service layer.
+- View multiple contacts together.
+- Search contacts using Stream API.
+- Bulk delete contacts.
+- Export contacts.
+- Demonstrate Composite Pattern.
+- Use Streams, Lambda Expressions, Method References, and Batch Processing.
 
 ---
 
 # Classes Used
 
-## `ContactObserver`
+## ContactComponent
 
-An interface representing an observer.
+Acts as the Component in the Composite Pattern.
 
 ### Method
 
 ```java
-void update(Contact contact);
+void showDetails();
 ```
 
-Responsibilities:
+Responsibilities
 
-- Receive notification whenever a contact is deleted.
+- Provides a common interface for both individual contacts and groups of contacts.
 
 ---
 
-## `NotificationObserver`
+## SingleContact
 
-Implements `ContactObserver`.
+Represents an individual contact.
 
-Responsibilities:
+Responsibilities
 
-- Display a notification after a contact is deleted.
-
-Example:
-
-```text
-===== NOTIFICATION =====
-Deleted Contact : Ramesh
-```
+- Stores a single Contact object.
+- Displays individual contact details.
 
 ---
 
-## `ContactDeleteSubject`
+## ContactGroup
 
-Acts as the Subject (Publisher).
+Represents a collection of contacts.
 
-Responsibilities:
+Responsibilities
 
-- Register observers.
-- Remove observers.
-- Notify all registered observers after deletion.
+- Store multiple ContactComponent objects.
+- Display all contacts using the same interface.
 
-### Methods
+Methods
 
 ```java
-addObserver(ContactObserver observer)
+add(ContactComponent contact)
 ```
 
 ```java
-removeObserver(ContactObserver observer)
+remove(ContactComponent contact)
 ```
 
 ```java
-notifyObservers(Contact contact)
+showDetails()
 ```
 
 ---
 
-## `UserService`
+## UserService
 
-Updated:
+### viewBulkContacts()
 
-### Constructor
+Displays all contacts using Composite Pattern.
 
-Registers observers.
+### searchContact()
 
-```java
-deleteSubject.addObserver(new NotificationObserver());
-```
+Searches contacts using:
 
-### `deleteContact()`
+- Stream API
+- Lambda Expressions
+- Method References
 
-Responsibilities:
+### bulkDeleteContacts()
 
-- Validate logged-in user.
-- Find the contact.
-- Remove the contact.
-- Notify all observers.
-- Return success message.
+Deletes multiple contacts in one operation.
+
+### exportContacts()
+
+Exports all contacts by printing them in a structured format.
 
 ---
 
-## `ManualTest`
+## ManualTest
 
-Updated to:
+Demonstrates:
 
-- Register user.
-- Login.
-- Add contacts.
-- Display contacts.
-- Delete a contact.
-- Notify observers.
-- Display remaining contacts.
+- User Registration
+- Login
+- Add Contacts
+- Bulk View
+- Search Contacts
+- Bulk Delete
+- Export Contacts
 
 ---
 
@@ -121,172 +115,154 @@ Updated to:
 User Login
       │
       ▼
-View Contact List
+Select Bulk Operation
       │
-      ▼
-Select Contact
-      │
-      ▼
-Delete Contact
-      │
-      ▼
-ContactDeleteSubject
-      │
-      ▼
-Notify Observers
-      │
-      ▼
-NotificationObserver
-      │
-      ▼
-Display Notification
+      ├──────────────┐
+      ▼              ▼
+ View Contacts   Search Contacts
+      │              │
+      ▼              ▼
+Composite Pattern  Stream API
+      │              │
+      └──────┬───────┘
+             ▼
+      Bulk Delete / Export
 ```
 
 ---
 
-# Observer Pattern Flow
+# Composite Pattern Structure
 
 ```text
-                 UserService
-                      │
-                      ▼
-          ContactDeleteSubject
-             │             │
-             ▼             ▼
- NotificationObserver   Future Observers
-                             │
-                    ┌────────┴────────┐
-                    ▼                 ▼
-              EmailObserver     LogObserver
+                ContactComponent
+                     ▲
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+    SingleContact         ContactGroup
+                                 │
+                    ┌────────────┴────────────┐
+                    ▼                         ▼
+             SingleContact             SingleContact
 ```
+
+---
+
+# Java Concepts Used
+
+## Stream API
+
+```java
+contacts.stream()
+```
+
+---
+
+## Lambda Expression
+
+```java
+contact -> contact.getName().contains(keyword)
+```
+
+---
+
+## Method Reference
+
+```java
+SingleContact::new
+```
+
+```java
+group::add
+```
+
+---
+
+## Batch Processing
+
+```java
+removeIf(...)
+```
+
+Processes multiple contacts in a single operation.
 
 ---
 
 # Testing
 
-## Test Case 1 – Delete Existing Contact
+## Test Case 1 – Bulk View
+
+### Expected Output
+
+Displays all contacts.
+
+---
+
+## Test Case 2 – Search Contact
 
 ### Input
 
-```text
-Contact ID : Valid Contact ID
+```
+Keyword : A
 ```
 
 ### Expected Output
 
-```text
-Contact Deleted Successfully
-
-===== NOTIFICATION =====
-Deleted Contact : Ramesh
-```
+Displays contacts whose names contain "A".
 
 ---
 
-## Test Case 2 – Invalid Contact ID
+## Test Case 3 – Bulk Delete
+
+### Input
+
+```
+Ajay
+Rahul
+```
 
 ### Expected Output
 
-```text
-Contact Not Found
 ```
+Bulk Delete Successful
+```
+
+Both contacts are removed.
 
 ---
 
-## Test Case 3 – User Not Logged In
+## Test Case 4 – Export Contacts
 
 ### Expected Output
 
-```text
+```
+Name | Phone | Email
+```
+
+All remaining contacts are displayed.
+
+---
+
+## Test Case 5 – Login Validation
+
+### Expected Output
+
+```
 Please login first
-```
-
----
-
-## Test Case 4 – Verify Contact Removal
-
-### Before Delete
-
-```text
-1. Ramesh
-2. Rahul
-```
-
-### After Delete
-
-```text
-1. Rahul
-```
-
----
-
-## Test Case 5 – Observer Notification
-
-### Expected Output
-
-```text
-===== NOTIFICATION =====
-Deleted Contact : Ramesh
 ```
 
 ---
 
 # Outcome
 
-Successfully implemented **UC7 – Delete Contact** using the **Observer Design Pattern**.
+Successfully implemented **UC8 – Bulk Operations** using the **Composite Design Pattern**.
 
 The implementation demonstrates:
 
-- Separation of deletion and notification logic.
-- Loose coupling between service and observers.
-- Easy extensibility for additional observers.
-- Better maintainability following the **Open/Closed Principle (OCP)**.
-- Single Responsibility Principle (SRP) by separating notification behavior from business logic.
-
----
-
-# Git Workflow
-
-## Create Feature Branch
-
-```bash
-git checkout -b feature/uc7-delete-contact-observer
-```
-
-## Stage Changes
-
-```bash
-git add .
-```
-
-## Commit
-
-```bash
-git commit -m "[Ariyan Pujari] Implement UC7: Delete Contact using Observer Pattern"
-```
-
-## Push Branch
-
-```bash
-git push -u origin feature/uc7-delete-contact-observer
-```
-
-## Merge into Development Branch
-
-```bash
-git checkout dev
-git merge feature/uc7-delete-contact-observer
-```
-
-## Push Development Branch
-
-```bash
-git push origin dev
-```
-
-## Delete Feature Branch (Optional)
-
-```bash
-git branch -d feature/uc7-delete-contact-observer
-git push origin --delete feature/uc7-delete-contact-observer
-```
+- Composite Pattern
+- Stream API
+- Lambda Expressions
+- Method References
+- Batch Processing
+- Collection Operations
+- Clean and reusable object-oriented design following the Open/Closed Principle (OCP).

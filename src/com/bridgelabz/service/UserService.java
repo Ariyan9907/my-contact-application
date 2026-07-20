@@ -2,6 +2,7 @@ package com.bridgelabz.service;
 
 import com.bridgelabz.command.CommandManager;
 import com.bridgelabz.command.EditContactCommand;
+import com.bridgelabz.composite.ContactGroup;
 import com.bridgelabz.decorator.BasicContactFormatter;
 import com.bridgelabz.decorator.ContactFormatter;
 import com.bridgelabz.decorator.MaskEmailDecorator;
@@ -14,8 +15,10 @@ import com.bridgelabz.observer.ContactDeleteSubject;
 import com.bridgelabz.observer.NotificationObserver;
 import com.bridgelabz.repository.UserRepository;
 import com.bridgelabz.util.PasswordHasher;
+import com.bridgelabz.composite.SingleContact;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.bridgelabz.validations.Validation.*;
 
@@ -266,6 +269,82 @@ public class UserService {
 
         commandManager.redo();
 
+    }
+
+    public void viewBulkContacts(User loggedInUser) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        ContactGroup group = new ContactGroup();
+
+        loggedInUser.getContacts()
+                .stream()
+                .map(SingleContact::new)
+                .forEach(group::add);
+
+        group.showDetails();
+    }
+
+    public String bulkDeleteContacts(User loggedInUser, List<String> names) {
+
+        if (loggedInUser == null) {
+            return "Please login first";
+        }
+
+        loggedInUser.getContacts()
+                .removeIf(contact ->
+                        names.contains(contact.getName()));
+
+        return "Bulk Delete Successful";
+    }
+
+    public void exportContacts(User loggedInUser) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        System.out.println("\n===== CONTACT EXPORT =====");
+
+        loggedInUser.getContacts()
+                .forEach(contact ->
+
+                        System.out.println(
+                                contact.getName()
+                                        + " | "
+                                        + contact.getPhoneNumber()
+                                        + " | "
+                                        + contact.getEmail()
+                        )
+                );
+    }
+
+    public void searchContact(User loggedInUser, String keyword) {
+
+        if (loggedInUser == null) {
+            System.out.println("Please login first");
+            return;
+        }
+
+        List<SingleContact> result =
+                loggedInUser.getContacts()
+                        .stream()
+                        .filter(contact ->
+                                contact.getName()
+                                        .toLowerCase()
+                                        .contains(keyword.toLowerCase()))
+                        .map(SingleContact::new)
+                        .collect(Collectors.toList());
+
+        ContactGroup group = new ContactGroup();
+
+        result.forEach(group::add);
+
+        group.showDetails();
     }
 
 
