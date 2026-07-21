@@ -1,290 +1,331 @@
-# UC12 – Apply Tags to Contacts using Observer Pattern
+# MyContacts Application
 
-## Objective
+A **Java Console-Based Contact Management System** developed using **Core Java**, **Object-Oriented Programming (OOP)** principles, **SOLID Principles**, and multiple **GoF Design Patterns**. The application allows users to securely manage contacts while demonstrating real-world software design concepts.
 
-Implement the **Apply Tags to Contacts** feature that allows a logged-in user to assign or remove one or more tags from contacts. The implementation uses the **Observer Pattern** to notify the system whenever tags are added or removed from a contact.
+---
+
+# Objective
+
+Develop a contact management application that demonstrates:
+
+- Object-Oriented Programming
+- SOLID Principles
+- Design Patterns
+- Java Collections
+- Java 8 Features
+- Clean Architecture
+- Secure User Authentication
 
 ---
 
 # Features
 
-- Assign one or multiple tags to a contact.
-- Remove tags from a contact.
-- View tags assigned to a contact.
-- Notify observers whenever tags are updated.
-- Support multiple tags using `Set<Tag>`.
-
----
-
-# Classes Used
-
-## TagObserver
-
-Acts as the Observer Interface.
-
-### Method
-
-```java
-void update(Contact contact, String message);
-```
-
-Responsibilities:
-
-- Receive notifications whenever a tag is added or removed.
-
----
-
-## TagNotificationObserver
-
-Implements `TagObserver`.
-
-Responsibilities:
-
-- Display notification messages whenever tag assignments change.
-
-Example:
-
-```
-===== TAG NOTIFICATION =====
-Family tag added to Rahul
-```
-
----
-
-## TagSubject
-
-Acts as the Subject (Publisher).
-
-Responsibilities:
-
-- Register observers.
-- Remove observers.
-- Notify observers whenever a tag operation occurs.
-
-### Methods
-
-```java
-addObserver(TagObserver observer)
-```
-
-```java
-removeObserver(TagObserver observer)
-```
-
-```java
-notifyObservers(Contact contact, String message)
-```
-
----
-
-## TagService
-
-Updated to:
-
-### addTag()
-
-- Validate tag.
-- Add tag to contact.
-- Notify observers.
-
-### removeTag()
-
-- Remove tag.
-- Notify observers.
-
-### viewTags()
-
-- Display all tags assigned to a contact.
-
----
-
-## UserService
-
-Updated to:
-
-- Register `TagNotificationObserver`.
-- Delegate tag operations to `TagService`.
-
----
-
-## ManualTest
-
-Demonstrates:
+## User Management
 
 - User Registration
-- Login
+- Secure Login
+- Password Hashing (SHA-256)
+- View User Profile
+
+---
+
+## Contact Management
+
 - Add Contact
+- View Contacts
+- View Contact Details
+- Update Contact
+- Delete Contact
+
+---
+
+## Undo / Redo
+
+- Undo Contact Update
+- Redo Contact Update
+
+---
+
+## Bulk Operations
+
+- Bulk View Contacts
+- Bulk Delete Contacts
+- Export Contacts
+
+---
+
+## Search
+
+Search contacts by:
+
+- Name
+- Phone Number
+- Email
+
+---
+
+## Advanced Filtering
+
+Filter contacts using:
+
+- Tags
+- Date Added
+- Frequently Contacted
+
+---
+
+## Tag Management
+
+- Create Tags
 - Assign Multiple Tags
+- Remove Tags
 - View Tags
-- Remove Tag
-- Observer Notification
 
 ---
 
-# Process Flow
+## Notifications
+
+- Delete Contact Notifications
+- Tag Update Notifications
+
+---
+
+# Technologies Used
+
+- Java 8+
+- Collections Framework
+- Stream API
+- Lambda Expressions
+- Method References
+- SHA-256 Password Hashing
+- UUID
+- LocalDate
+- LocalDateTime
+- Regex
+- Comparator
+- Maven
+
+---
+
+# Project Structure
 
 ```text
-User Login
-      │
-      ▼
-Select Contact
-      │
-      ▼
-Add / Remove Tag
-      │
-      ▼
-TagService
-      │
-      ▼
-TagSubject
-      │
-      ▼
-Notify Observers
-      │
-      ▼
-TagNotificationObserver
-      │
-      ▼
-Display Notification
+src
+└── com
+    └── bridgelabz
+        ├── command
+        ├── composite
+        ├── decorator
+        ├── factory
+        ├── filter
+        ├── model
+        ├── observer
+        ├── repository
+        ├── search
+        ├── service
+        ├── tag
+        ├── tagobserver
+        ├── util
+        └── validations
 ```
 
 ---
 
-# Observer Pattern Flow
+# Design Patterns Implemented
+
+| Use Case | Design Pattern |
+|-----------|----------------|
+| UC1 | Factory Pattern |
+| UC4 | Factory Pattern |
+| UC5 | Decorator Pattern |
+| UC6 | Command Pattern |
+| UC7 | Observer Pattern |
+| UC8 | Composite Pattern |
+| UC9 | Specification Pattern |
+| UC9 | Chain of Responsibility Pattern |
+| UC10 | Strategy Pattern |
+| UC10 | Composite Pattern |
+| UC11 | Flyweight Pattern |
+| UC12 | Observer Pattern |
+
+---
+
+# SOLID Principles Applied
+
+### Single Responsibility Principle (SRP)
+
+Examples:
+
+- UserFactory
+- ContactFactory
+- TagValidator
+- NotificationObserver
+- CommandManager
+
+---
+
+### Open/Closed Principle (OCP)
+
+Examples:
+
+- Decorator Pattern
+- Strategy Pattern
+- Specification Pattern
+
+---
+
+### Liskov Substitution Principle (LSP)
+
+Examples:
+
+- ContactFilter
+- SearchCriteria
+- Command
+- ContactObserver
+
+---
+
+### Interface Segregation Principle (ISP)
+
+Examples:
+
+- Command
+- ContactFilter
+- SearchCriteria
+- ContactObserver
+- TagObserver
+
+---
+
+### Dependency Inversion Principle (DIP)
+
+Examples:
+
+- SearchHandler → SearchCriteria
+- CompositeFilter → ContactFilter
+- CommandManager → Command
+- TagSubject → TagObserver
+
+---
+
+# OOP Concepts Used
+
+- Classes & Objects
+- Encapsulation
+- Abstraction
+- Inheritance
+- Polymorphism
+- Composition
+- Association
+- Many-to-Many Relationship
+
+---
+
+# Java Concepts Covered
+
+- Collections Framework
+- List
+- Set
+- HashSet
+- HashMap
+- Stack
+- Stream API
+- Lambda Expressions
+- Method References
+- Comparator
+- Functional Interfaces
+- UUID
+- LocalDate
+- LocalDateTime
+- SHA-256 Hashing
+- Regex Validation
+- Exception Handling
+
+---
+
+# Use Cases Implemented
+
+| UC | Feature |
+|----|---------|
+| UC1 | User Registration |
+| UC2 | User Login |
+| UC3 | View Profile |
+| UC4 | Contact Management |
+| UC5 | View Contact Details |
+| UC6 | Undo / Redo Contact Updates |
+| UC7 | Delete Contact |
+| UC8 | Bulk Operations |
+| UC9 | Search Contacts |
+| UC10 | Advanced Filtering |
+| UC11 | Create & Manage Tags |
+| UC12 | Apply Tags to Contacts |
+
+---
+
+# Project Workflow
 
 ```text
-              TagService
-                  │
-                  ▼
-             TagSubject
-                  │
-        ┌─────────┴─────────┐
-        ▼                   ▼
-TagNotificationObserver   Future Observers
-                              │
-                     ┌────────┴────────┐
-                     ▼                 ▼
-                 Logger          EmailNotifier
+Register User
+      │
+      ▼
+Login
+      │
+      ▼
+Manage Contacts
+      │
+      ├───────────────┐
+      ▼               ▼
+ Search          Bulk Operations
+      │               │
+      ▼               ▼
+ Advanced Filtering   Tag Management
+      │               │
+      └───────┬───────┘
+              ▼
+       Notifications
 ```
 
 ---
 
-# Java Concepts Used
+# Learning Outcomes
 
-## Set Operations
+This project demonstrates practical implementation of:
 
-```java
-contact.getTags().add(tag);
-```
-
-```java
-contact.getTags().remove(tag);
-```
-
-Ensures unique tags for every contact.
-
----
-
-## Bidirectional Relationship
-
-- One contact can have multiple tags.
-- One tag can be shared by multiple contacts.
+- Object-Oriented Programming
+- SOLID Principles
+- GoF Design Patterns
+- Java Collections
+- Java 8 Functional Programming
+- Clean Code Practices
+- Layered Architecture
+- Real-world Software Design
 
 ---
 
-## Observer Pattern
+# Future Enhancements
 
-Automatically notifies all registered observers whenever a tag is added or removed.
-
----
-
-# Testing
-
-## Test Case 1 – Add Tag
-
-### Input
-
-```
-Family
-```
-
-### Expected Output
-
-```
-Tag Added Successfully
-
-===== TAG NOTIFICATION =====
-Family tag added to Rahul
-```
+- File-Based Contact Storage
+- Database Integration (MySQL)
+- Spring Boot REST APIs
+- JWT Authentication
+- Import/Export Contacts (CSV/Excel)
+- Contact Groups
+- Favorites
+- Search by Multiple Criteria
+- GUI using JavaFX
+- Unit Testing with JUnit
+- Logging using Log4j/SLF4J
 
 ---
 
-## Test Case 2 – Add Multiple Tags
+# Author
 
-### Input
+**Aryan Pujari**
 
-```
-Family
-Friends
-```
-
-### Expected Output
-
-```
-Tags : [Family, Friends]
-```
+Java Full Stack Developer
 
 ---
 
-## Test Case 3 – Remove Tag
+# License
 
-### Input
-
-```
-Friends
-```
-
-### Expected Output
-
-```
-Tag Removed Successfully
-
-===== TAG NOTIFICATION =====
-Friends tag removed from Rahul
-```
-
----
-
-## Test Case 4 – View Tags
-
-### Expected Output
-
-```
-Tags : [Family]
-```
-
----
-
-## Test Case 5 – User Not Logged In
-
-### Expected Output
-
-```
-Please login first
-```
-
----
-
-# Outcome
-
-Successfully implemented **UC12 – Apply Tags to Contacts** using the **Observer Pattern**.
-
-The implementation demonstrates:
-
-- Observer Pattern
-- Set Operations
-- Bidirectional Relationship Management
-- Multiple Tag Assignment
-- Event Notification
-- Clean separation between business logic and notification logic
-- Extensible design following the Open/Closed Principle (OCP)
+This project is created for learning purposes to demonstrate Java, OOP, SOLID Principles, and Design Patterns.
